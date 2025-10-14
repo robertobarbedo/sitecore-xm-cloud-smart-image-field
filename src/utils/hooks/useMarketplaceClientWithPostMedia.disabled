@@ -1,0 +1,176 @@
+// utils/hooks/useMarketplaceClientWithPostMedia.ts
+
+import { ClientSDK } from "@sitecore-marketplace-sdk/client";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { XMC } from "@sitecore-marketplace-sdk/xmc";
+
+export interface ExtendedClient {
+  client: ClientSDK;
+  postMedia: (presignedUploadUrl: string, fileBinary: ArrayBuffer) => Promise<Response>;
+}
+
+export interface MarketplaceClientWithPostMediaState {
+  client: ExtendedClient | null;
+  error: Error | null;
+  isLoading: boolean;
+  isInitialized: boolean;
+}
+
+export interface UseMarketplaceClientOptions {
+  /**
+   * Number of retry attempts when initialization fails
+   * @default 3
+   */
+  retryAttempts?: number;
+
+  /**
+   * Delay between retry attempts in milliseconds
+   * @default 1000
+   */
+  retryDelay?: number;
+
+  /**
+   * Whether to automatically initialize the client
+   * @default true
+   */
+  autoInit?: boolean;
+}
+
+// PostMedia function that uses SDK's internal request mechanism
+async function createPostMediaFunction(client: ClientSDK) {
+  return async (presignedUploadUrl: string, fileBinary: ArrayBuffer): Promise<Response> => {
+    if (!presignedUploadUrl) {
+      throw new Error('presignedUploadUrl is required for postMedia');
+    }
+    if (!fileBinary) {
+      throw new Error('fileBinary is required for postMedia');
+    }
+
+    //const url = new URL(presignedUploadUrl);
+    //const path = url.pathname + url.search + url.hash;
+    //console.log('mario PATH: ', path);  
+    const newPath = presignedUploadUrl.replace('sitecore/api/authoring/graphql/v1/', '');
+    console.log('mario NEW PATH: ', newPath);
+    const request = new Request(newPath, {
+      method: 'POST',
+      body: fileBinary,
+      headers: {
+        'Content-Type': 'application/octet-stream'
+      }
+    });
+
+    // Use the internal _fetch method via type assertion
+    return (client as any)._fetch(request);
+  };
+}
+
+const DEFAULT_OPTIONS: Required<UseMarketplaceClientOptions> = {
+  retryAttempts: 3,
+  retryDelay: 1000,
+  autoInit: true,
+};
+
+let extendedClient: ExtendedClient | undefined = undefined;
+
+async function getExtendedMarketplaceClient(): Promise<ExtendedClient> {
+  if (extendedClient) {
+    return extendedClient;
+  }
+
+  const config = {
+    target: window.parent,
+    modules: [XMC],
+  };
+
+  // Initialize the base ClientSDK
+  const baseClient = await ClientSDK.init(config);
+  
+  // Create the postMedia function bound to this client
+  const postMediaFunction = await createPostMediaFunction(baseClient);
+  
+  // Create extended client wrapper
+  extendedClient = {
+    client: baseClient,
+    postMedia: postMediaFunction
+  };
+  
+  return extendedClient;
+}
+
+export function useMarketplaceClientWithPostMedia(options: UseMarketplaceClientOptions = {}) {
+  // Memoize the options to prevent unnecessary re-renders
+  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [
+    options,
+  ]);
+
+  const [state, setState] = useState<MarketplaceClientWithPostMediaState>({
+    client: null,
+    error: null,
+    isLoading: false,
+    isInitialized: false,
+  });
+
+  // Use ref to track if we're currently initializing to prevent race conditions
+  const isInitializingRef = useRef(false);
+
+  const initializeClient = useCallback(async (attempt = 1): Promise<void> => {
+    // Use functional state update to check current state without dependencies
+    let shouldProceed = false;
+    setState((prev: MarketplaceClientWithPostMediaState) => {
+      if (prev.isLoading || prev.isInitialized || isInitializingRef.current) {
+        return prev;
+      }
+      shouldProceed = true;
+      isInitializingRef.current = true;
+      return { ...prev, isLoading: true, error: null };
+    });
+
+    if (!shouldProceed) return;
+
+    try {
+      const extendedClient = await getExtendedMarketplaceClient();
+      setState({
+        client: extendedClient,
+        error: null,
+        isLoading: false,
+        isInitialized: true,
+      });
+    } catch (error) {
+      if (attempt < opts.retryAttempts) {
+        await new Promise(resolve => setTimeout(resolve, opts.retryDelay));
+        return initializeClient(attempt + 1);
+      }
+
+      setState({
+        client: null,
+        error: error instanceof Error ? error : new Error('Failed to initialize Extended MarketplaceClient'),
+        isLoading: false,
+        isInitialized: false,
+      });
+    } finally {
+      isInitializingRef.current = false;
+    }
+  }, [opts.retryAttempts, opts.retryDelay]);
+
+  useEffect(() => {
+    if (opts.autoInit) {
+      initializeClient();
+    }
+
+    return () => {
+      isInitializingRef.current = false;
+      setState({
+        client: null,
+        error: null,
+        isLoading: false,
+        isInitialized: false,
+      });
+    };
+  }, [opts.autoInit, initializeClient]);
+
+  // Memoize the return value to prevent object recreation on every render
+  return useMemo(() => ({
+    ...state,
+    initialize: initializeClient,
+  }), [state, initializeClient]);
+}

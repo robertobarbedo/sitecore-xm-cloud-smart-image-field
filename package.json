@@ -9,6 +9,7 @@
   "dependencies": {
     "@sitecore-marketplace-sdk/client": "^0.2.0",
     "@sitecore-marketplace-sdk/xmc": "^0.2.1",
+    "@supabase/supabase-js": "^2.75.1",
     "next": "^15.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

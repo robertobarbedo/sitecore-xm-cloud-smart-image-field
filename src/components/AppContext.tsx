@@ -31,30 +31,103 @@ export function AppContext({ onContextLoaded }: AppContextProps) {
   }, [client, error, isInitialized, onContextLoaded]);
 
   if (!isInitialized) {
-    return <p>Initializing extension...</p>;
+    return (
+      <div className="application-context">
+        <p>Initializing extension...</p>
+        <style jsx>{`
+          .application-context {
+            padding: 16px;
+          }
+          .application-context p {
+            color: #666;
+            font-size: 13px;
+            margin: 0;
+          }
+        `}</style>
+      </div>
+    );
   }
 
   if (error) {
-    return <p style={{ color: "red" }}>Error: {String(error)}</p>;
+    return (
+      <div className="application-context">
+        <p style={{ color: "#d32f2f" }}>Error: {String(error)}</p>
+        <style jsx>{`
+          .application-context {
+            padding: 16px;
+          }
+          .application-context p {
+            font-size: 13px;
+            margin: 0;
+          }
+        `}</style>
+      </div>
+    );
   }
 
   return (
     <div className="application-context">
-      <h1>Welcome to {appContext?.name}</h1>
-      <p>This is a custom field extension.</p>
-      
-      <div>
-        <h3>Application Context:</h3>
-        <ul className="context-details">
-          <li><strong>Name:</strong> {appContext?.name}</li>
-          <li><strong>ID:</strong> {appContext?.id}</li>
-          <li><strong>Icon URL:</strong> {appContext?.iconUrl}</li>
-          <li><strong>Installation ID:</strong> {appContext?.installationId}</li>
-          <li><strong>State:</strong> {appContext?.state}</li>
-          <li><strong>Type:</strong> {appContext?.type}</li>
-          <li><strong>URL:</strong> {appContext?.url}</li>
-        </ul>
+      <div className="context-section">
+        <h3>Application Context</h3>
+        <div className="context-details">
+          <div className="detail-item">
+            <span className="detail-label">Name:</span>
+            <span className="detail-value">{appContext?.name}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">ID:</span>
+            <span className="detail-value">{appContext?.id}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Installation ID:</span>
+            <span className="detail-value">{appContext?.installationId}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">State:</span>
+            <span className="detail-value">{appContext?.state}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Type:</span>
+            <span className="detail-value">{appContext?.type}</span>
+          </div>
+        </div>
       </div>
+      
+      <style jsx>{`
+        .application-context {
+          padding: 16px;
+        }
+        
+        .context-section h3 {
+          color: #333;
+          font-size: 14px;
+          font-weight: 600;
+          margin: 0 0 12px 0;
+        }
+        
+        .context-details {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .detail-item {
+          font-size: 13px;
+        }
+        
+        .detail-label {
+          display: block;
+          color: #666;
+          font-weight: 400;
+          margin-bottom: 4px;
+        }
+        
+        .detail-value {
+          color: #333;
+          word-break: break-all;
+          font-size: 12px;
+        }
+      `}</style>
     </div>
   );
 }

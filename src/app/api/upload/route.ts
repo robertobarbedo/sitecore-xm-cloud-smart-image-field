@@ -139,15 +139,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the successful response from Sitecore
-    const sitecoreResponse = await uploadResponse.text();
+    const sitecoreResponse = await uploadResponse.json();
     console.log('Upload successful, Sitecore response:', sitecoreResponse);
-
-    // Generate item ID (in production, parse from Sitecore response)
-    const itemId = `uploaded-item-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
     return NextResponse.json({
       success: true,
-      itemId: itemId,
+      itemId: sitecoreResponse?.Id ?? null,
       message: 'File uploaded successfully to Sitecore',
       sitecoreResponse: sitecoreResponse
     });

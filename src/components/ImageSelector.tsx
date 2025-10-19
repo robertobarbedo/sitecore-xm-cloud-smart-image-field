@@ -2,28 +2,57 @@
 
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { ClientSDK, ApplicationContext } from '@sitecore-marketplace-sdk/client';
 import { getConfig } from '@/src/lib/config';
 import { createFolder } from '@/src/lib/folder-manager';
+import { getUrlParams } from '@/src/lib/supabase-client';
 
 interface ImageSelectorProps {
   client: ClientSDK;
+  onImageSelected?: (imageData: UploadedImageData) => void;
 }
 
 interface UploadedImageData {
   path: string;
   itemPath: string;
   itemId: string;
+  imageUrl?: string;
+  altText?: string;
+  description?: string;
+  imageName?: string;
+  imageExtension?: string;
+  width?: number;
+  height?: number;
+  sizeKb?: number;
+  aspectRatio?: string;
 }
 
-export function ImageSelector({ client }: ImageSelectorProps) {
+export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
   const [uploadedImage, setUploadedImage] = useState<UploadedImageData | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [baseFolder, setBaseFolder] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load base folder once on mount
+  useEffect(() => {
+    const loadBaseFolder = async () => {
+      const params = getUrlParams();
+      if (!params) return;
+      
+      try {
+        const config = await getConfig(params.organizationId, params.key);
+        setBaseFolder(config.baseFolder);
+      } catch (error) {
+        console.error('Error loading base folder:', error);
+      }
+    };
+    
+    loadBaseFolder();
+  }, []);
 
   const sanitizeFileName = (fileName: string): string => {
     // Remove file extension
@@ -33,7 +62,6 @@ export function ImageSelector({ client }: ImageSelectorProps) {
   };
 
   const generateFolderPath = (): string => {
-    const config = getConfig(''); // Pass empty string for organization ID as it's hardcoded
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -41,7 +69,39 @@ export function ImageSelector({ client }: ImageSelectorProps) {
     const hour = String(now.getHours()).padStart(2, '0');
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     
-    return `${config.baseFolder}/${year}/${month}/${day}/${hour}/${randomSuffix}`;
+    return `${baseFolder}/${year}/${month}/${day}/${hour}/${randomSuffix}`;
+  };
+
+  /**
+   * Calculate the greatest common divisor (GCD) using Euclidean algorithm
+   */
+  const gcd = (a: number, b: number): number => {
+    return b === 0 ? a : gcd(b, a % b);
+  };
+
+  /**
+   * Calculate the aspect ratio from width and height
+   * Returns a string like "16:9" or "4:3"
+   */
+  const calculateAspectRatio = (width: number, height: number): string => {
+    const divisor = gcd(width, height);
+    const ratioWidth = width / divisor;
+    const ratioHeight = height / divisor;
+    return `${ratioWidth}:${ratioHeight}`;
+  };
+
+  /**
+   * Load image dimensions from file
+   */
+  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve({ width: img.width, height: img.height });
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
   };
 
 
@@ -145,12 +205,35 @@ export function ImageSelector({ client }: ImageSelectorProps) {
       const previewUrl = URL.createObjectURL(file);
       setPreviewUrl(previewUrl);
 
+      // Get image dimensions
+      setUploadStatus('Reading image properties...');
+      const dimensions = await getImageDimensions(file);
+      
+      // Calculate file size in KB
+      const sizeKb = Math.round((file.size / 1024) * 100) / 100;
+      
+      // Calculate aspect ratio
+      const aspectRatio = calculateAspectRatio(dimensions.width, dimensions.height);
+      
+      console.log('Image properties:', {
+        width: dimensions.width,
+        height: dimensions.height,
+        sizeKb,
+        aspectRatio
+      });
+
+      // Extract file name and extension
+      const fileName = file.name;
+      const lastDotIndex = fileName.lastIndexOf('.');
+      const fileExtension = lastDotIndex !== -1 ? fileName.substring(lastDotIndex + 1).toLowerCase() : '';
+      const fileNameWithoutExt = lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName;
+
       // Generate folder path and sanitize file name
       const folderPath = generateFolderPath();
       const sanitizedFileName = sanitizeFileName(file.name);
       const itemPath = `${folderPath}/${sanitizedFileName}`;
 
-      setUploadStatus('Preparing upload...');
+      setUploadStatus('Creating folder structure...');
       
       // Create the folder structure
       await createFolder(client, folderPath);
@@ -170,34 +253,34 @@ export function ImageSelector({ client }: ImageSelectorProps) {
         path: folderPath,
         itemPath: itemPath,
         itemId: itemId,
+        imageUrl: previewUrl, // Use the preview URL as thumbnail
+        altText: '',
+        description: '',
+        imageName: fileNameWithoutExt,
+        imageExtension: fileExtension,
+        width: dimensions.width,
+        height: dimensions.height,
+        sizeKb: sizeKb,
+        aspectRatio: aspectRatio
       };
 
       setUploadedImage(imageData);
       setUploadStatus('Upload completed successfully!');
 
+      // Notify parent component about the selected image
+      if (onImageSelected) {
+        onImageSelected(imageData);
+      }
+
     } catch (error) {
       console.error('Upload error:', error);
-      setUploadStatus(`Upload failed 2: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setUploadStatus(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!uploadedImage) {
-      alert('No image to save');
-      return;
-    }
 
-    try {
-      const dataToSave = JSON.stringify(uploadedImage);
-      await client.setValue(dataToSave, true);
-      alert('Image saved successfully!');
-    } catch (error) {
-      console.error('Save error:', error);
-      alert(`Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -232,14 +315,6 @@ export function ImageSelector({ client }: ImageSelectorProps) {
 
   return (
     <div className="image-selector-container">
-      <div className="header">
-        {uploadedImage && (
-          <button onClick={handleSave} className="save-button">
-            Save
-          </button>
-        )}
-      </div>
-
       <div className="upload-section">
         <div 
           className={`drop-zone ${isDragOver ? 'drag-over' : ''} ${isUploading ? 'uploading' : ''}`}
@@ -259,31 +334,35 @@ export function ImageSelector({ client }: ImageSelectorProps) {
           {previewUrl ? (
             <div className="preview-container">
               <img src={previewUrl} alt="Preview" className="preview-image" />
-              <div className="upload-overlay">
-                {isUploading ? (
-                  <div className="upload-progress">
-                    <div className="spinner"></div>
-                    <div>{uploadStatus}</div>
-                  </div>
-                ) : (
-                  <div className="upload-success">
-                    ✓ {uploadStatus}
-                  </div>
-                )}
-              </div>
+              {isUploading && (
+                <div className="upload-progress">
+                  <div className="spinner"></div>
+                  <span>{uploadStatus}</span>
+                </div>
+              )}
+              {!isUploading && uploadStatus && (
+                <div className="upload-success">
+                  ✓ Uploaded successfully
+                </div>
+              )}
             </div>
           ) : (
             <div className="drop-zone-content">
-              <div className="upload-icon">📁</div>
+              <div className="upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
               <div className="upload-text">
-                <div>Drag and drop an image here</div>
-                <div className="upload-subtext">or click to select a file</div>
+                Browse media library or drop an image here
               </div>
             </div>
           )}
         </div>
 
-        {uploadStatus && !previewUrl && (
+        {uploadStatus && !previewUrl && isUploading && (
           <div className="status-message">
             {uploadStatus}
           </div>
@@ -299,60 +378,30 @@ export function ImageSelector({ client }: ImageSelectorProps) {
 
       <style jsx>{`
         .image-selector-container {
-          padding: 20px;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-        
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-        
-        .header h2 {
-          color: #333;
-          margin: 0;
-        }
-        
-        .save-button {
-          background-color: #007acc;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          transition: background-color 0.2s;
-        }
-        
-        .save-button:hover {
-          background-color: #005a9f;
+          padding: 16px;
         }
         
         .upload-section {
-          margin-top: 20px;
+          margin-top: 0;
         }
         
         .drop-zone {
-          border: 2px dashed #ccc;
-          border-radius: 8px;
-          padding: 40px;
+          border: 1px dashed #d0d0d0;
+          border-radius: 2px;
+          padding: 24px;
           text-align: center;
           cursor: pointer;
           transition: all 0.2s;
           background-color: #fafafa;
           position: relative;
-          min-height: 200px;
+          min-height: 120px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
         
         .drop-zone.drag-over {
-          border-color: #007acc;
+          border-color: #1e90ff;
           background-color: #f0f8ff;
         }
         
@@ -364,68 +413,54 @@ export function ImageSelector({ client }: ImageSelectorProps) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
+          gap: 8px;
         }
         
         .upload-icon {
-          font-size: 48px;
-          opacity: 0.6;
+          color: #999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         
         .upload-text {
           color: #666;
-        }
-        
-        .upload-subtext {
-          font-size: 14px;
-          color: #999;
-          margin-top: 4px;
+          font-size: 13px;
         }
         
         .preview-container {
           position: relative;
           max-width: 100%;
-          max-height: 300px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
         }
         
         .preview-image {
           max-width: 100%;
-          max-height: 300px;
+          max-height: 200px;
           object-fit: contain;
-          border-radius: 4px;
-        }
-        
-        .upload-overlay {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 10px;
-          border-radius: 0 0 4px 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
         }
         
         .upload-progress {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
+          font-size: 12px;
+          color: #666;
         }
         
         .upload-success {
           color: #4caf50;
-          font-weight: 600;
+          font-size: 12px;
         }
         
         .spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid #f3f3f3;
-          border-top: 2px solid #007acc;
+          width: 14px;
+          height: 14px;
+          border: 2px solid #e0e0e0;
+          border-top: 2px solid #1e90ff;
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
@@ -436,12 +471,10 @@ export function ImageSelector({ client }: ImageSelectorProps) {
         }
         
         .status-message {
-          margin-top: 16px;
-          padding: 12px;
-          background-color: #f0f8ff;
-          border-left: 4px solid #007acc;
-          border-radius: 4px;
-          color: #333;
+          margin-top: 12px;
+          padding: 8px;
+          font-size: 12px;
+          color: #666;
         }
       `}</style>
     </div>

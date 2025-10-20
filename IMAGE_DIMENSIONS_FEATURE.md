@@ -143,7 +143,7 @@ Sort Results → Paginate → Display
   "path": "/sitecore/media library/Images",
   "itemPath": "/sitecore/media library/Images/photo",
   "itemId": "abc123",
-  "imageUrl": "https://...",
+  "previewUrl": "https://...",
   "altText": "Photo",
   "description": "A nice photo"
 }
@@ -155,7 +155,7 @@ Sort Results → Paginate → Display
   "path": "/sitecore/media library/Images",
   "itemPath": "/sitecore/media library/Images/photo",
   "itemId": "abc123",
-  "imageUrl": "https://...",
+  "previewUrl": "https://...",
   "altText": "Photo",
   "description": "A nice photo",
   "width": 1920,

@@ -4,12 +4,14 @@
 
 import { useState, useEffect } from 'react';
 import { ClientSDK } from '@sitecore-marketplace-sdk/client';
+import { getConfig } from '@/src/lib/config';
+import { getUrlParams } from '@/src/lib/supabase-client';
 
 interface SelectedImage {
   path: string;
   itemPath: string;
   itemId: string;
-  imageUrl?: string;
+  previewUrl?: string;
   altText?: string;
   description?: string;
 }
@@ -23,6 +25,25 @@ interface ImageMetadataProps {
 export function ImageMetadata({ client, selectedImage, onMetadataChange }: ImageMetadataProps) {
   const [altText, setAltText] = useState('');
   const [description, setDescription] = useState('');
+  const [previewHost, setPreviewHost] = useState<string>('');
+  const [organizationId, setOrganizationId] = useState<string>('');
+
+  // Load preview host and organization ID
+  useEffect(() => {
+    const loadConfig = async () => {
+      const params = getUrlParams();
+      if (params) {
+        setOrganizationId(params.organizationId);
+        try {
+          const config = await getConfig(params.organizationId, params.key);
+          setPreviewHost(config.previewHost);
+        } catch (error) {
+          console.error('Error loading config:', error);
+        }
+      }
+    };
+    loadConfig();
+  }, []);
 
   // Load metadata when selectedImage changes
   useEffect(() => {
@@ -72,9 +93,9 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
 
   return (
     <div className="image-metadata-container">
-      {selectedImage.imageUrl && (
+      {selectedImage.previewUrl && (
         <div className="image-preview">
-          <img src={selectedImage.imageUrl} alt={altText || 'Selected image'} />
+          <img src={selectedImage.previewUrl} alt={altText || 'Selected image'} />
         </div>
       )}
 
@@ -106,7 +127,34 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
         <div className="image-info">
           <div className="info-item">
             <span className="info-label">Image path</span>
-            <span className="info-value">{selectedImage.itemPath}</span>
+            {previewHost && organizationId ? (
+              <>
+                <a
+                  href={`${previewHost}sitecore/shell/Applications/Content%20Editor.aspx?sc_bw=1&organization=${organizationId}&id=${selectedImage.itemId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="info-value-link"
+                >
+                  {selectedImage.itemPath}
+                  <svg 
+                    className="external-icon" 
+                    width="12" 
+                    height="12" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+                <span className="path-hint">(Ctrl + Click to Open Content Editor in a New Tab)</span>
+              </>
+            ) : (
+              <span className="info-value">{selectedImage.itemPath}</span>
+            )}
           </div>
           <div className="info-item">
             <span className="info-label">Item ID</span>
@@ -195,6 +243,40 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
           color: #333;
           word-break: break-all;
           font-size: 12px;
+        }
+
+        .info-value-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          color: #1e90ff;
+          text-decoration: none;
+          word-break: break-all;
+          font-size: 12px;
+          transition: color 0.2s;
+        }
+
+        .info-value-link:hover {
+          color: #0066cc;
+          text-decoration: underline;
+        }
+
+        .external-icon {
+          flex-shrink: 0;
+          margin-left: 2px;
+          opacity: 0.7;
+        }
+
+        .info-value-link:hover .external-icon {
+          opacity: 1;
+        }
+
+        .path-hint {
+          display: block;
+          font-size: 11px;
+          color: #999;
+          margin-top: 4px;
+          font-style: italic;
         }
       `}</style>
     </div>

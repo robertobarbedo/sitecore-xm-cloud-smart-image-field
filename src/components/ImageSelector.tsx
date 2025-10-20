@@ -7,6 +7,7 @@ import { ClientSDK, ApplicationContext } from '@sitecore-marketplace-sdk/client'
 import { getConfig } from '@/src/lib/config';
 import { createFolder } from '@/src/lib/folder-manager';
 import { getUrlParams } from '@/src/lib/supabase-client';
+import { RecommendedInfoPanel } from './RecommendedInfoPanel';
 
 interface ImageSelectorProps {
   client: ClientSDK;
@@ -17,7 +18,7 @@ interface UploadedImageData {
   path: string;
   itemPath: string;
   itemId: string;
-  imageUrl?: string;
+  previewUrl?: string;
   altText?: string;
   description?: string;
   imageName?: string;
@@ -248,12 +249,25 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
       // Upload the file
       const itemId = await uploadToPresignedUrl(file, presignedUrl);
 
+      // Construct the proper preview URL using preview host + path
+      const params = getUrlParams();
+      let actualPreviewUrl = previewUrl; // Fallback to blob URL
+      if (params && baseFolder) {
+        try {
+          const config = await getConfig(params.organizationId, params.key);
+          // Convert itemPath to preview URL: /sitecore/media library/... -> https://host/-jssmedia/...
+          actualPreviewUrl = itemPath.replace(/^\/sitecore\/media library\//i, config.previewHost + '-/jssmedia/');
+        } catch (error) {
+          console.error('Error getting config for preview URL:', error);
+        }
+      }
+
       // Set the uploaded image data
       const imageData: UploadedImageData = {
         path: folderPath,
         itemPath: itemPath,
         itemId: itemId,
-        imageUrl: previewUrl, // Use the preview URL as thumbnail
+        previewUrl: actualPreviewUrl, // Use the actual preview host URL
         altText: '',
         description: '',
         imageName: fileNameWithoutExt,
@@ -315,6 +329,9 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
 
   return (
     <div className="image-selector-container">
+      {/* Show recommendations and validation */}
+      <RecommendedInfoPanel uploadedImage={uploadedImage} />
+
       <div className="upload-section">
         <div 
           className={`drop-zone ${isDragOver ? 'drag-over' : ''} ${isUploading ? 'uploading' : ''}`}

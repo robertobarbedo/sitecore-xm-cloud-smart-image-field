@@ -17,7 +17,7 @@ interface SelectedImage {
   path: string;
   itemPath: string;
   itemId: string;
-  imageUrl?: string;
+  previewUrl?: string;
   altText?: string;
   description?: string;
   imageName?: string;
@@ -59,11 +59,11 @@ function CustomFieldExtension() {
             }
             
             const config = await getConfig(params.organizationId, params.key);
-            // Replace "/sitecore/media library/" with config.previewHost + "/-/jssmedia/"
-            const imageUrl = parsedValue.itemPath
-              .replace(/^\/sitecore\/media library\//i, config.previewHost + '/-/jssmedia/');
+            // Replace "/sitecore/media library/" with config.previewHost + "-/jssmedia/"
+            const previewUrl = parsedValue.itemPath
+              .replace(/^\/sitecore\/media library\//i, config.previewHost + '-/jssmedia/');
             
-            parsedValue.imageUrl = imageUrl;
+            parsedValue.previewUrl = previewUrl;
             
             // Extract name and extension if not already present
             if (!parsedValue.imageName || !parsedValue.imageExtension) {
@@ -195,14 +195,14 @@ function CustomFieldExtension() {
       
       // Save to Supabase for search functionality
       const params = getUrlParams();
-      if (params && selectedImage.imageUrl) {
+      if (params && selectedImage.previewUrl) {
         console.log('Saving to Supabase with params:', params);
         const result = await upsertImageMetadata({
           organization_id: params.organizationId,
           key: params.key,
           image_item_path: selectedImage.itemPath,
           image_item_id: selectedImage.itemId,
-          image_preview_path: selectedImage.imageUrl,
+          image_preview_path: selectedImage.previewUrl,
           alt_text: selectedImage.altText,
           description: selectedImage.description,
           image_name: selectedImage.imageName,
@@ -219,7 +219,7 @@ function CustomFieldExtension() {
           console.error('Failed to save to Supabase:', result.error);
         }
       } else {
-        console.warn('Skipping Supabase save - missing URL params or imageUrl');
+        console.warn('Skipping Supabase save - missing URL params or previewUrl');
       }
       
       // Update initial image to current state after successful save
@@ -235,6 +235,8 @@ function CustomFieldExtension() {
 
   const handleImageSelected = (imageData: SelectedImage) => {
     setSelectedImage(imageData);
+    // Automatically switch to Metadata tab when an image is selected or uploaded
+    setActiveView('metadata');
   };
 
   const handleMetadataChange = (altText: string, description: string) => {
@@ -327,9 +329,9 @@ function CustomFieldExtension() {
 
           {/* Right side - Thumbnail and Save */}
           <div className="toolbar-right">
-            {selectedImage?.imageUrl && (
+            {selectedImage?.previewUrl && (
               <div className="thumbnail-preview">
-                <img src={selectedImage.imageUrl} alt="Selected" />
+                <img src={selectedImage.previewUrl} alt="Selected" />
               </div>
             )}
             <button 

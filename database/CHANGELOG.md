@@ -38,7 +38,7 @@ ADD COLUMN IF NOT EXISTS image_extension TEXT;
   "path": "/sitecore/media library/Default Website/2024/...",
   "itemPath": "/sitecore/media library/.../beach.jpg",
   "itemId": "item-123",
-  "imageUrl": "https://.../beach.jpg",
+  "previewUrl": "https://.../beach.jpg",
   "altText": "Beach sunset",
   "description": "Beautiful beach at sunset",
   "imageName": "beach",

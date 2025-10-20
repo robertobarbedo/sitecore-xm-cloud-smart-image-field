@@ -67,7 +67,7 @@ When an image is selected, the `onImageSelected` callback receives:
   path: string;              // Folder path
   itemPath: string;          // Full Sitecore media library path
   itemId: string;            // Sitecore item ID
-  imageUrl: string;          // Preview URL
+  previewUrl: string;          // Preview URL
   altText: string;           // Alt text from metadata
   description: string;       // Description from metadata
   imageName: string;         // File name without extension
@@ -129,7 +129,7 @@ When an image is selected, the `onImageSelected` callback receives:
 
 Images are loaded from:
 ```
-config.previewHost + "/-/jssmedia/" + path
+config.previewHost + "-/jssmedia/" + path
 ```
 
 Example:

@@ -119,7 +119,7 @@ npm run dev -- -p 3001
 
 ### ❌ "Missing URL params" Warning
 
-**Warning in Console:** "Skipping Supabase save - missing URL params or imageUrl"
+**Warning in Console:** "Skipping Supabase save - missing URL params or previewUrl"
 
 **Cause:** The URL doesn't have required parameters.
 

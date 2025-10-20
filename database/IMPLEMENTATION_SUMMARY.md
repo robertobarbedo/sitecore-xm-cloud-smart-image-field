@@ -119,7 +119,7 @@ const handleSave = async () => {
         key: params.key,
         image_item_path: selectedImage.itemPath,
         image_item_id: selectedImage.itemId,
-        image_preview_path: selectedImage.imageUrl || '',
+        image_preview_path: selectedImage.previewUrl || '',
         alt_text: selectedImage.altText,
         description: selectedImage.description
       });

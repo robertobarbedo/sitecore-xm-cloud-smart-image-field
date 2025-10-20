@@ -89,7 +89,7 @@ await upsertImageMetadata({
   key: params.key,
   image_item_path: imageData.itemPath,
   image_item_id: imageData.itemId,
-  image_preview_path: imageData.imageUrl,
+  image_preview_path: imageData.previewUrl,
   alt_text: imageData.altText,
   description: imageData.description
 });

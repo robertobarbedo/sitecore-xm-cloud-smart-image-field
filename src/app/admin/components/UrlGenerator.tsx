@@ -24,12 +24,25 @@ export function UrlGenerator({ library, onBack }: UrlGeneratorProps) {
   const [originalWidth, setOriginalWidth] = useState('');
   const [originalHeight, setOriginalHeight] = useState('');
   const [originalSizeKb, setOriginalSizeKb] = useState('');
+  const [originalAspectRatio, setOriginalAspectRatio] = useState('');
   const [viewports, setViewports] = useState<Viewports>({
     mobile: null,
     tablet: null,
     small: null,
   });
   const fieldUrlHost = process.env.NEXT_PUBLIC_FIELD_URL_HOST || 'http://localhost:3000';
+
+  const commonAspectRatios = [
+    { value: '', label: 'No recommendation' },
+    { value: '1:1', label: '1:1 (Square)' },
+    { value: '4:3', label: '4:3 (Standard)' },
+    { value: '3:2', label: '3:2 (Classic)' },
+    { value: '16:9', label: '16:9 (Widescreen)' },
+    { value: '21:9', label: '21:9 (Ultrawide)' },
+    { value: '9:16', label: '9:16 (Portrait)' },
+    { value: '2:3', label: '2:3 (Portrait)' },
+    { value: '3:4', label: '3:4 (Portrait)' },
+  ];
 
   const generateUrl = (): string => {
     const params = new URLSearchParams();
@@ -46,6 +59,11 @@ export function UrlGenerator({ library, onBack }: UrlGeneratorProps) {
     // Original Image Size
     if (originalSizeKb) {
       params.set('orisizekb', originalSizeKb);
+    }
+
+    // Original Aspect Ratio
+    if (originalAspectRatio) {
+      params.set('oriaspect', originalAspectRatio.replace(':', 'per'));
     }
 
     // Viewports
@@ -158,6 +176,22 @@ export function UrlGenerator({ library, onBack }: UrlGeneratorProps) {
               />
               <small className="help-text">Maximum file size in kilobytes</small>
             </div>
+          </div>
+
+          <div className="form-group">
+            <label>Original Aspect Ratio</label>
+            <select
+              value={originalAspectRatio}
+              onChange={(e) => setOriginalAspectRatio(e.target.value)}
+              className="aspect-ratio-select"
+            >
+              {commonAspectRatios.map((ratio) => (
+                <option key={ratio.value} value={ratio.value}>
+                  {ratio.label}
+                </option>
+              ))}
+            </select>
+            <small className="help-text">Recommended aspect ratio for the image</small>
           </div>
         </div>
 
@@ -400,7 +434,8 @@ export function UrlGenerator({ library, onBack }: UrlGeneratorProps) {
         }
 
         input[type="number"],
-        input[type="text"] {
+        input[type="text"],
+        select {
           width: 100%;
           padding: 8px 12px;
           border: 1px solid #d0d0d0;
@@ -410,10 +445,16 @@ export function UrlGenerator({ library, onBack }: UrlGeneratorProps) {
         }
 
         input[type="number"]:focus,
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        select:focus {
           outline: none;
           border-color: #7C3AED;
           box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        select {
+          cursor: pointer;
+          background-color: white;
         }
 
         .help-text {

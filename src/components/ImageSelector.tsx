@@ -27,6 +27,7 @@ interface UploadedImageData {
   height?: number;
   sizeKb?: number;
   aspectRatio?: string;
+  mimeType?: string;
 }
 
 export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
@@ -268,14 +269,15 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
         itemPath: itemPath,
         itemId: itemId,
         previewUrl: actualPreviewUrl, // Use the actual preview host URL
-        altText: '',
-        description: '',
+        altText: '', // Will be filled manually or via AI button
+        description: '', // Will be filled manually or via AI button
         imageName: fileNameWithoutExt,
         imageExtension: fileExtension,
         width: dimensions.width,
         height: dimensions.height,
         sizeKb: sizeKb,
-        aspectRatio: aspectRatio
+        aspectRatio: aspectRatio,
+        mimeType: file.type
       };
 
       setUploadedImage(imageData);
@@ -329,8 +331,10 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
 
   return (
     <div className="image-selector-container">
-      {/* Show recommendations and validation */}
-      <RecommendedInfoPanel uploadedImage={uploadedImage} />
+      {/* Show recommendations and validation - centered */}
+      <div className="recommendations-wrapper">
+        <RecommendedInfoPanel uploadedImage={uploadedImage} />
+      </div>
 
       <div className="upload-section">
         <div 
@@ -396,6 +400,12 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
       <style jsx>{`
         .image-selector-container {
           padding: 16px;
+        }
+
+        .recommendations-wrapper {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 12px;
         }
         
         .upload-section {

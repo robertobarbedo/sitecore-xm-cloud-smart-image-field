@@ -203,7 +203,8 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
         width: image.width,
         height: image.height,
         sizeKb: image.size_kb,
-        aspectRatio: image.aspect_ratio
+        aspectRatio: image.aspect_ratio,
+        mimeType: image.mime_type
       });
     }
   };
@@ -225,9 +226,6 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
 
   return (
     <div className="image-find-container">
-      {/* Show recommendations */}
-      <RecommendedInfoPanel />
-
       <div className="main-layout">
         {/* Left Sidebar - Filters */}
         <div className="filters-sidebar">
@@ -334,16 +332,9 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
             </div>
           </div>
 
-      {/* Results Summary */}
-      <div className="results-summary">
-        {loading ? (
-          <span>Searching...</span>
-        ) : (
-          <span>
-            {images.length} image{images.length !== 1 ? 's' : ''} found
-            {searchQuery && ` for "${searchQuery}"`}
-          </span>
-        )}
+      {/* Recommended Info Panel - replaces results summary */}
+      <div className="recommendations-container">
+        <RecommendedInfoPanel compact={true} />
       </div>
 
       {/* Error Message */}
@@ -381,8 +372,25 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
                     {image.alt_text}
                   </div>
                 )}
-                <div className="image-date">
-                  {new Date(image.created_at || '').toLocaleDateString()}
+                <div className="image-specs">
+                  {image.width && image.height && (
+                    <div className="spec-item" title="Dimensions">
+                      <svg className="spec-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="18" height="18" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M3 3L21 21M21 3L3 21" stroke="currentColor" strokeWidth="1" opacity="0.3"/>
+                      </svg>
+                      <span>{image.width}×{image.height}</span>
+                    </div>
+                  )}
+                  {image.aspect_ratio && (
+                    <div className="spec-item" title="Aspect Ratio">
+                      <svg className="spec-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="7" width="16" height="10" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M12 7V17" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2"/>
+                      </svg>
+                      <span>{image.aspect_ratio}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -605,9 +613,7 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
           background-color: #f5f5f5;
         }
 
-        .results-summary {
-          font-size: 13px;
-          color: #666;
+        .recommendations-container {
           margin-bottom: 12px;
         }
 
@@ -684,6 +690,35 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
           overflow: hidden;
           text-overflow: ellipsis;
           margin-bottom: 4px;
+        }
+
+        .image-specs {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 4px;
+          flex-wrap: wrap;
+        }
+
+        .spec-item {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          font-size: 10px;
+          color: #666;
+          background-color: #f5f5f5;
+          padding: 2px 0px;
+          border-radius: 2px;
+        }
+
+        .spec-icon {
+          width: 12px;
+          height: 12px;
+          color: #999;
+          flex-shrink: 0;
+        }
+
+        .spec-item span {
+          white-space: nowrap;
         }
 
         .image-date {

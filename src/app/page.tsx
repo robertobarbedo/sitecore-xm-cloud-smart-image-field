@@ -26,6 +26,7 @@ interface SelectedImage {
   height?: number;
   sizeKb?: number;
   aspectRatio?: string;
+  mimeType?: string;
 }
 
 function CustomFieldExtension() {
@@ -210,7 +211,8 @@ function CustomFieldExtension() {
           width: selectedImage.width,
           height: selectedImage.height,
           size_kb: selectedImage.sizeKb,
-          aspect_ratio: selectedImage.aspectRatio
+          aspect_ratio: selectedImage.aspectRatio,
+          mime_type: selectedImage.mimeType
         });
         
         if (result.success) {

@@ -12,13 +12,16 @@ interface RecommendedInfoPanelProps {
     sizeKb?: number;
     aspectRatio?: string;
   } | null;
+  // Control whether to show margins (default: true for backward compatibility)
+  compact?: boolean;
 }
 
-export function RecommendedInfoPanel({ uploadedImage }: RecommendedInfoPanelProps) {
+export function RecommendedInfoPanel({ uploadedImage, compact = false }: RecommendedInfoPanelProps) {
   const [recommendedWidth, setRecommendedWidth] = useState<number | null>(null);
   const [recommendedHeight, setRecommendedHeight] = useState<number | null>(null);
   const [recommendedSizeKb, setRecommendedSizeKb] = useState<number | null>(null);
   const [recommendedAspectRatio, setRecommendedAspectRatio] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // Parse URL query parameters for recommendations
   useEffect(() => {
@@ -103,8 +106,28 @@ export function RecommendedInfoPanel({ uploadedImage }: RecommendedInfoPanelProp
   return (
     <>
       {/* Show recommendations banner */}
-      <div className="recommendations-banner">
-        <span className="recommendations-title">Recommended:</span>
+      <div className={`recommendations-banner ${compact ? 'compact' : ''}`}>
+        <span 
+          className="info-icon-wrapper"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <svg 
+            className="info-icon" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+          </svg>
+          {showTooltip && (
+            <span className="tooltip">
+              These are the recommended specifications for this image.
+            </span>
+          )}
+        </span>
         <span className="recommendations-list">
           {(recommendedWidth && recommendedHeight) && (
             <>
@@ -140,21 +163,65 @@ export function RecommendedInfoPanel({ uploadedImage }: RecommendedInfoPanelProp
 
       <style jsx>{`
         .recommendations-banner {
-          background-color: #e3f2fd;
-          border: 1px solid #90caf9;
           border-radius: 4px;
           padding: 10px 16px;
           margin-bottom: 16px;
           display: flex;
           align-items: center;
+          justify-content: flex-end;
           gap: 8px;
           flex-wrap: wrap;
         }
 
-        .recommendations-title {
-          font-size: 13px;
-          font-weight: 600;
+        .recommendations-banner.compact {
+          padding: 0px 0;
+          margin-bottom: 0;
+          border-radius: 0;
+          justify-content: flex-start;
+        }
+
+        .info-icon-wrapper {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          cursor: help;
+        }
+
+        .info-icon {
+          width: 18px;
+          height: 18px;
           color: #1565c0;
+          transition: color 0.2s;
+        }
+
+        .info-icon-wrapper:hover .info-icon {
+          color: #0d47a1;
+        }
+
+        .tooltip {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 8px;
+          background-color: #333;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-size: 12px;
+          white-space: nowrap;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          z-index: 1000;
+        }
+
+        .tooltip::after {
+          content: '';
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 6px solid transparent;
+          border-bottom-color: #333;
         }
 
         .recommendations-list {

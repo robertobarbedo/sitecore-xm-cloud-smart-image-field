@@ -25,6 +25,7 @@ export interface ImageMetadata {
   height?: number;
   size_kb?: number;
   aspect_ratio?: string;
+  mime_type?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -70,6 +71,7 @@ export async function upsertImageMetadata(data: Omit<ImageMetadata, 'id' | 'crea
       p_height: data.height || null,
       p_size_kb: data.size_kb || null,
       p_aspect_ratio: data.aspect_ratio || null,
+      p_mime_type: data.mime_type || null,
     });
 
     if (error) {

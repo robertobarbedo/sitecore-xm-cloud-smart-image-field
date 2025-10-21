@@ -24,19 +24,31 @@ export async function analyzeImage(
   // Construct the prompt based on options
   const promptParts = [
     'Analyze this image and provide:',
-    '1. A clear, descriptive caption (suitable for alt text)',
+    '1. A clear, descriptive, but shorter, caption (suitable for alt text)',
+    '2. A clear, descriptive longer description (suitable for use in vector search)',
+    '3. The focal point of the image as normalized coordinates (0.0 to 1.0) where (0.5, 0.5) is center',
+    '   - focus_x: horizontal position (0.0 = left edge, 1.0 = right edge)',
+    '   - focus_y: vertical position (0.0 = top edge, 1.0 = bottom edge)',
+    '   - IMPORTANT: Carefully identify the main subject or most prominent element:',
+    '     * If there are people/faces, make them the focal point (prioritize faces)',
+    '     * If there is a clear main subject (person, product, animal), center on it',
+    '     * If text is the main element, center on the text',
+    '     * Only use (0.5, 0.5) if the image is truly centered or has no clear focal point',
+    '   - Calculate the actual position of the focal point, DO NOT default to center',
+    '   - Be precise: examine where the main subject actually is in the frame'
   ];
 
   if (includeTags) {
-    promptParts.push('2. Relevant tags/keywords (as an array)');
+    //promptParts.push('3. Relevant tags/keywords (as an array)');
   }
 
   if (includeOCR) {
-    promptParts.push('3. Any visible text in the image (OCR)');
+    //promptParts.push('4. Any visible text in the image (OCR)');
   }
 
-  promptParts.push('\nRespond in JSON format with keys: caption, tags, ocr_text');
-  promptParts.push('If no text is visible, return an empty array for ocr_text.');
+  promptParts.push('\nRespond in JSON format with keys: caption, description, focus_x, and focus_y');
+  promptParts.push('focus_x and focus_y must be numbers between 0.0 and 1.0');
+  //promptParts.push('If no text is visible, return an empty array for ocr_text.');
   
   const prompt = promptParts.join('\n');
 
@@ -87,10 +99,14 @@ export async function analyzeImage(
     const result: ImageAnalysisResult = JSON.parse(content);
 
     // Ensure all required fields exist
+    console.log('Analyzed image result:', result);
     return {
       caption: result.caption || '',
+      description: result.description || '',
       tags: result.tags || [],
-      ocr_text: result.ocr_text || []
+      ocr_text: result.ocr_text || [],
+      focus_x: result.focus_x ?? 0.5,
+      focus_y: result.focus_y ?? 0.5
     };
 
   } catch (error) {

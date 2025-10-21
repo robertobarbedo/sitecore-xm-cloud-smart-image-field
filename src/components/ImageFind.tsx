@@ -205,7 +205,9 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
         height: image.height,
         sizeKb: image.size_kb,
         aspectRatio: image.aspect_ratio,
-        mimeType: image.mime_type
+        mimeType: image.mime_type,
+        focusX: image.focus_x,
+        focusY: image.focus_y
       });
     }
   };

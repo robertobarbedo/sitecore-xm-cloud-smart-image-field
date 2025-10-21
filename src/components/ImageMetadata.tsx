@@ -16,17 +16,21 @@ interface SelectedImage {
   altText?: string;
   description?: string;
   mimeType?: string;
+  focusX?: number;
+  focusY?: number;
 }
 
 interface ImageMetadataProps {
   client: ClientSDK;
   selectedImage: SelectedImage | null;
-  onMetadataChange: (altText: string, description: string) => void;
+  onMetadataChange: (altText: string, description: string, focusX?: number, focusY?: number) => void;
 }
 
 export function ImageMetadata({ client, selectedImage, onMetadataChange }: ImageMetadataProps) {
   const [altText, setAltText] = useState('');
   const [description, setDescription] = useState('');
+  const [focusX, setFocusX] = useState(0.5);
+  const [focusY, setFocusY] = useState(0.5);
   const [previewHost, setPreviewHost] = useState<string>('');
   const [organizationId, setOrganizationId] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -54,6 +58,8 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
     if (selectedImage) {
       setAltText(selectedImage.altText || '');
       setDescription(selectedImage.description || '');
+      setFocusX(selectedImage.focusX ?? 0.5);
+      setFocusY(selectedImage.focusY ?? 0.5);
       setAiError(''); // Clear error when image changes
     }
   }, [selectedImage]);
@@ -61,13 +67,13 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
   const handleAltTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAltText(value);
-    onMetadataChange(value, description);
+    onMetadataChange(value, description, focusX, focusY);
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setDescription(value);
-    onMetadataChange(altText, value);
+    onMetadataChange(altText, value, focusX, focusY);
   };
 
   const handleFillWithAI = async () => {
@@ -125,11 +131,15 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
       
       // Update fields with AI results
       const newAltText = aiResult.caption || '';
-      const newDescription = aiResult.ocr_text.join(' ') || '';
+      const newDescription = aiResult.description || '';
+      const newFocusX = aiResult.focus_x ?? 0.5;
+      const newFocusY = aiResult.focus_y ?? 0.5;
       
       setAltText(newAltText);
       setDescription(newDescription);
-      onMetadataChange(newAltText, newDescription);
+      setFocusX(newFocusX);
+      setFocusY(newFocusY);
+      onMetadataChange(newAltText, newDescription, newFocusX, newFocusY);
       
       console.log('AI Analysis complete:', aiResult);
     } catch (error) {
@@ -269,6 +279,10 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
             rows={4}
           />
         </div>
+
+        {/* Hidden inputs for focal point data */}
+        <input type="hidden" name="focusX" value={focusX} />
+        <input type="hidden" name="focusY" value={focusY} />
 
         <div className="image-info">
           <div className="info-item">

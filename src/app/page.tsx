@@ -27,6 +27,8 @@ interface SelectedImage {
   sizeKb?: number;
   aspectRatio?: string;
   mimeType?: string;
+  focusX?: number;
+  focusY?: number;
 }
 
 function CustomFieldExtension() {
@@ -212,7 +214,9 @@ function CustomFieldExtension() {
           height: selectedImage.height,
           size_kb: selectedImage.sizeKb,
           aspect_ratio: selectedImage.aspectRatio,
-          mime_type: selectedImage.mimeType
+          mime_type: selectedImage.mimeType,
+          focus_x: selectedImage.focusX,
+          focus_y: selectedImage.focusY
         });
         
         if (result.success) {
@@ -241,12 +245,14 @@ function CustomFieldExtension() {
     setActiveView('metadata');
   };
 
-  const handleMetadataChange = (altText: string, description: string) => {
+  const handleMetadataChange = (altText: string, description: string, focusX?: number, focusY?: number) => {
     if (selectedImage) {
       setSelectedImage({
         ...selectedImage,
         altText,
-        description
+        description,
+        ...(focusX !== undefined && { focusX }),
+        ...(focusY !== undefined && { focusY })
       });
     }
   };

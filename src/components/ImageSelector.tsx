@@ -28,6 +28,8 @@ interface UploadedImageData {
   sizeKb?: number;
   aspectRatio?: string;
   mimeType?: string;
+  focusX?: number;
+  focusY?: number;
 }
 
 export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {

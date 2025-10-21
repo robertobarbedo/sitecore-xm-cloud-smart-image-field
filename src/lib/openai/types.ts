@@ -2,8 +2,11 @@
 
 export interface ImageAnalysisResult {
   caption: string;
+  description: string;
   tags: string[];
   ocr_text: string[];
+  focus_x: number;
+  focus_y: number;
 }
 
 export interface OpenAIConfig {

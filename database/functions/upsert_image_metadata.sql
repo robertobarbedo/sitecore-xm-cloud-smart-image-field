@@ -15,7 +15,9 @@ CREATE OR REPLACE FUNCTION upsert_image_metadata(
     p_height INTEGER DEFAULT NULL,
     p_size_kb NUMERIC DEFAULT NULL,
     p_aspect_ratio TEXT DEFAULT NULL,
-    p_mime_type TEXT DEFAULT NULL
+    p_mime_type TEXT DEFAULT NULL,
+    p_focus_x NUMERIC DEFAULT NULL,
+    p_focus_y NUMERIC DEFAULT NULL
 )
 RETURNS UUID AS $$
 DECLARE
@@ -35,7 +37,9 @@ BEGIN
         height,
         size_kb,
         aspect_ratio,
-        mime_type
+        mime_type,
+        focus_x,
+        focus_y
     ) VALUES (
         p_organization_id,
         p_key,
@@ -50,7 +54,9 @@ BEGIN
         p_height,
         p_size_kb,
         p_aspect_ratio,
-        p_mime_type
+        p_mime_type,
+        p_focus_x,
+        p_focus_y
     )
     ON CONFLICT (organization_id, key, image_item_id)
     DO UPDATE SET
@@ -65,6 +71,8 @@ BEGIN
         size_kb = EXCLUDED.size_kb,
         aspect_ratio = EXCLUDED.aspect_ratio,
         mime_type = EXCLUDED.mime_type,
+        focus_x = EXCLUDED.focus_x,
+        focus_y = EXCLUDED.focus_y,
         updated_at = NOW()
     RETURNING id INTO v_id;
     

@@ -209,7 +209,7 @@ export function LibraryForm({
                   rel="noopener noreferrer"
                   className="credentials-link"
                 >
-                  Click here to create Automation credentials →
+                  "Ctrl + Click" here to create Automation credentials →
                 </a>
               </p>
             )}

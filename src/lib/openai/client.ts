@@ -37,8 +37,11 @@ export async function analyzeImageClient(file?: File, base64Data?: string): Prom
 
     return {
       caption: data.caption || '',
+      description: data.description || '',
       tags: data.tags || [],
-      ocr_text: data.ocr_text || []
+      ocr_text: data.ocr_text || [],
+      focus_x: data.focus_x ?? 0.5,
+      focus_y: data.focus_y ?? 0.5
     };
 
   } catch (error) {

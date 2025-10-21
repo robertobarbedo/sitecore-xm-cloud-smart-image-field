@@ -180,7 +180,7 @@ SELECT upsert_image_metadata(
     'e3641953fabc471fb110d46241bce7a1',
     '/sitecore/media library/test/beach.jpg',
     'item-beach-001',
-    'https://example.com/-/jssmedia/test/beach.jpg',
+    'https://example.com/-/media/test/beach.jpg',
     'Beautiful beach sunset',
     'A stunning sunset over the ocean with orange and pink skies reflecting on the water'
 );

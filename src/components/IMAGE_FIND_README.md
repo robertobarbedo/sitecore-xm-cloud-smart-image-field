@@ -129,12 +129,12 @@ When an image is selected, the `onImageSelected` callback receives:
 
 Images are loaded from:
 ```
-config.previewHost + "-/jssmedia/" + path
+config.previewHost + "-/media/" + path
 ```
 
 Example:
 ```
-https://example.com/-/jssmedia/Default Website/2024/01/15/beach.jpg
+https://example.com/-/media/Default Website/2024/01/15/beach.jpg
 ```
 
 ### Fallback Behavior

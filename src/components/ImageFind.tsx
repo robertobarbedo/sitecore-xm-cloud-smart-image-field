@@ -189,7 +189,8 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
     
     if (onImageSelected && previewHost) {
       const previewUrl = image.image_item_path
-        .replace(/^\/sitecore\/media library\//i, previewHost + '-/jssmedia/');
+        .replace(/^\/sitecore\/media library\//i, previewHost + '-/media/')
+        + (image.image_extension ? `.${image.image_extension}` : '');
 
       onImageSelected({
         path: image.image_item_path.substring(0, image.image_item_path.lastIndexOf('/')),
@@ -209,9 +210,12 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
     }
   };
 
-  const getPreviewUrl = (imagePath: string) => {
+  const getPreviewUrl = (imagePath: string, imageExtension?: string) => {
     if (!previewHost) return imagePath;
-    return imagePath.replace(/^\/sitecore\/media library\//i, previewHost + '-/jssmedia/');
+    return (
+      imagePath.replace(/^\/sitecore\/media library\//i, previewHost + '-/media/') +
+      (imageExtension ? `.${imageExtension}` : '')
+    );
   };
 
   // Pagination
@@ -355,7 +359,7 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
             >
               <div className="image-thumbnail">
                 <img
-                  src={getPreviewUrl(image.image_item_path)}
+                  src={getPreviewUrl(image.image_item_path, image.image_extension)}
                   alt={image.alt_text || image.image_name || 'Image'}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23ddd" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';

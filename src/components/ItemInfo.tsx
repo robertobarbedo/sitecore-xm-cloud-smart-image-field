@@ -13,6 +13,7 @@ interface ItemInfo {
   itemId: string;
   name: string;
   path: string;
+  url?: string;
   fields: {
     nodes: ItemField[];
   };
@@ -74,6 +75,7 @@ export function ItemInfo({ itemId = "{AC5FDC0C-F33B-4524-B6F7-AA2E42CF857A}" }: 
               itemId
               name
               path
+              url
               fields(ownFields: true, excludeStandardFields: true) {
                 nodes {
                   name
@@ -108,6 +110,7 @@ export function ItemInfo({ itemId = "{AC5FDC0C-F33B-4524-B6F7-AA2E42CF857A}" }: 
               itemId: itemData.itemId,
               name: itemData.name,
               path: itemData.path,
+              url: itemData.url,
               fields: itemData.fields || { nodes: [] }
             });
           } else {
@@ -157,6 +160,11 @@ export function ItemInfo({ itemId = "{AC5FDC0C-F33B-4524-B6F7-AA2E42CF857A}" }: 
         <div className="item-field">
           <strong>Path:</strong> {itemInfo.path}
         </div>
+        {itemInfo.url && (
+          <div className="item-field">
+            <strong>URL:</strong> {itemInfo.url}
+          </div>
+        )}
         
         {itemInfo.fields.nodes.length > 0 && (
           <div className="item-field">

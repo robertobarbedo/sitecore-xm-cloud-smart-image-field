@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useMarketplaceClient } from "@/src/utils/hooks/useMarketplaceClient";
 import { ApplicationContext } from "@sitecore-marketplace-sdk/client";
+import { ItemInfo } from "./ItemInfo";
 
 interface AppContextProps {
   onContextLoaded?: (context: ApplicationContext) => void;
@@ -91,6 +92,9 @@ export function AppContext({ onContextLoaded }: AppContextProps) {
             <span className="detail-value">{appContext?.type}</span>
           </div>
         </div>
+      </div>
+      <div>
+        <ItemInfo itemId="EE42AE9C7EEB40F69EE91C700DDF660A" />
       </div>
       
       <style jsx>{`

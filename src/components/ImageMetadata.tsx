@@ -82,13 +82,23 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
     try {
       console.log('Fetching image for AI analysis:', selectedImage.previewUrl);
       
-      // Use proxy to fetch image and avoid CORS issues
+      // Get URL params for authentication
+      const params = getUrlParams();
+      if (!params) {
+        throw new Error('Missing URL parameters for authentication');
+      }
+      
+      // Use proxy to fetch image with OAuth2 authentication
       const proxyResponse = await fetch('/api/proxy-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ imageUrl: selectedImage.previewUrl }),
+        body: JSON.stringify({ 
+          imageUrl: selectedImage.previewUrl,
+          organizationId: params.organizationId,
+          key: params.key
+        }),
       });
 
       if (!proxyResponse.ok) {
@@ -107,6 +117,8 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
       
       // Format as data URI for OpenAI
       const dataUri = `data:${contentType};base64,${base64Data}`;
+      
+      console.log('Image fetched and converted, analyzing with AI...');
       
       // Analyze the image - pass base64 data directly
       const aiResult = await analyzeImageClient(undefined, dataUri);

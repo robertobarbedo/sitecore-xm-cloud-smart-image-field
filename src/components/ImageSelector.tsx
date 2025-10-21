@@ -166,16 +166,24 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
   };
 
   const uploadToPresignedUrl = async (file: File, presignedUrl: string): Promise<string> => {
+    // Get URL params for authentication
+    const params = getUrlParams();
+    if (!params) {
+      throw new Error('Missing URL parameters for authentication');
+    }
+
     // Escape the presigned URL for use as a query parameter
     const encodedPresignedUrl = encodeURIComponent(presignedUrl);
     // Also encode the file type and name
     const encodedFileType = encodeURIComponent(file.type);
     const encodedFileName = encodeURIComponent(file.name);
+    const encodedOrgId = encodeURIComponent(params.organizationId);
+    const encodedKey = encodeURIComponent(params.key);
     
     // Convert file to ArrayBuffer for binary upload
     const fileBuffer = await file.arrayBuffer();
 
-    const response = await fetch(`/api/upload?presignedUrl=${encodedPresignedUrl}&fileType=${encodedFileType}&fileName=${encodedFileName}`, {
+    const response = await fetch(`/api/upload?presignedUrl=${encodedPresignedUrl}&fileType=${encodedFileType}&fileName=${encodedFileName}&organizationId=${encodedOrgId}&key=${encodedKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream'
@@ -256,8 +264,8 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
       if (params && baseFolder) {
         try {
           const config = await getConfig(params.organizationId, params.key);
-          // Convert itemPath to preview URL: /sitecore/media library/... -> https://host/-jssmedia/...
-          actualPreviewUrl = itemPath.replace(/^\/sitecore\/media library\//i, config.previewHost + '-/jssmedia/');
+          // Convert itemPath to preview URL: /sitecore/media library/... -> https://host/-media/...
+          actualPreviewUrl = itemPath.replace(/^\/sitecore\/media library\//i, config.previewHost + '-/media/') + (fileExtension ? `.${fileExtension}` : '');
         } catch (error) {
           console.error('Error getting config for preview URL:', error);
         }

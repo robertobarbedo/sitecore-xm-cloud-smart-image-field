@@ -60,9 +60,10 @@ function CustomFieldExtension() {
             }
             
             const config = await getConfig(params.organizationId, params.key);
-            // Replace "/sitecore/media library/" with config.previewHost + "-/jssmedia/"
+            // Replace "/sitecore/media library/" with config.previewHost + "-/media/"
             const previewUrl = parsedValue.itemPath
-              .replace(/^\/sitecore\/media library\//i, config.previewHost + '-/jssmedia/');
+              .replace(/^\/sitecore\/media library\//i, config.previewHost + '-/media/')
+              + (parsedValue.imageExtension ? `.${parsedValue.imageExtension}` : '');
             
             parsedValue.previewUrl = previewUrl;
             
@@ -80,7 +81,6 @@ function CustomFieldExtension() {
                 parsedValue.imageExtension = '';
               }
             }
-            
             setSelectedImage(parsedValue);
             setInitialImage(parsedValue); // Store initial state for comparison
             

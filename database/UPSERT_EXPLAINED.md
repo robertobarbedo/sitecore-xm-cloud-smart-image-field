@@ -71,7 +71,7 @@ upsertImageMetadata({
   key: "e3641953fabc471fb110d46241bce7a1",
   image_item_path: "/sitecore/media library/test/beach.jpg",
   image_item_id: "item-beach-001",
-  image_preview_path: "https://.../-/jssmedia/test/beach.jpg",
+  image_preview_path: "https://.../-/media/test/beach.jpg",
   alt_text: "Beach sunset",
   description: "Beautiful beach"
 });
@@ -93,7 +93,7 @@ upsertImageMetadata({
   key: "e3641953fabc471fb110d46241bce7a1",  // Same
   image_item_id: "item-beach-001",  // Same ← Triggers UPDATE
   image_item_path: "/sitecore/media library/test/beach.jpg",
-  image_preview_path: "https://.../-/jssmedia/test/beach.jpg",
+  image_preview_path: "https://.../-/media/test/beach.jpg",
   alt_text: "Stunning beach sunset",  // Updated!
   description: "Beautiful sunset over the beach"  // Updated!
 });

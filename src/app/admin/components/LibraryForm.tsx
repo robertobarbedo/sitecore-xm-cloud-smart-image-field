@@ -28,15 +28,29 @@ export function LibraryForm({
       name: '',
       folder: '',
       previewHost: '',
+      client_id: '',
+      client_secret: '',
     }
   );
   const [errors, setErrors] = useState<string[]>([]);
+  const [organizationId, setOrganizationId] = useState<string>('');
 
   useEffect(() => {
     if (library) {
       setFormData(library);
     }
   }, [library]);
+
+  // Get organizationId from URL params for credentials link
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const orgId = params.get('organizationId');
+      if (orgId) {
+        setOrganizationId(orgId);
+      }
+    }
+  }, []);
 
   const validateForm = (): LibraryValidationResult => {
     const validationErrors: string[] = [];
@@ -179,6 +193,58 @@ export function LibraryForm({
           <small className="help-text">Must end with .sitecorecloud.io. This is the value seem in the Content Editor URL. Example: https://xmc-yourtenantname.sitecorecloud.io/</small>
         </div>
 
+        <div className="form-section-divider"></div>
+
+        <div className="form-section-header">
+          <h3>Environment Credentials</h3>
+          <div className="credentials-help">
+            <p>
+              To use advanced features like automated image processing, you need to create Automation credentials in Sitecore Cloud.
+            </p>
+            {organizationId && (
+              <p>
+                <a 
+                  href={`https://deploy.sitecorecloud.io/credentials/environment?organization=${organizationId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="credentials-link"
+                >
+                  Click here to create Automation credentials →
+                </a>
+              </p>
+            )}
+            <p className="help-note">
+              💡 Create a new credential of type <strong>Automation</strong>, then copy and paste the Client ID and Client Secret below.
+            </p>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>
+            Client ID:
+          </label>
+          <input
+            type="text"
+            value={formData.client_id || ''}
+            onChange={(e) => handleChange('client_id', e.target.value)}
+            placeholder=""
+          />
+          <small className="help-text">Sitecore Cloud environment Client ID for automation</small>
+        </div>
+
+        <div className="form-group">
+          <label>
+            Client Secret:
+          </label>
+          <input
+            type="password"
+            value={formData.client_secret || ''}
+            onChange={(e) => handleChange('client_secret', e.target.value)}
+            placeholder="Enter your Client Secret"
+          />
+          <small className="help-text">Keep this secret secure. It will be encrypted in storage.</small>
+        </div>
+
         <div className="form-actions">
           <button type="submit" className="btn-primary">
             Save
@@ -297,6 +363,69 @@ export function LibraryForm({
         .help-text.locked {
           color: #999;
           font-style: italic;
+        }
+
+        .form-section-divider {
+          height: 1px;
+          background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+          margin: 32px 0 24px 0;
+        }
+
+        .form-section-header {
+          margin-bottom: 20px;
+        }
+
+        .form-section-header h3 {
+          font-size: 16px;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 12px 0;
+        }
+
+        .credentials-help {
+          background-color: #fff3e0;
+          border-left: 4px solid #ff9800;
+          padding: 14px 16px;
+          border-radius: 4px;
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
+        .credentials-help p {
+          margin: 0 0 8px 0;
+          color: #555;
+        }
+
+        .credentials-help p:last-child {
+          margin-bottom: 0;
+        }
+
+        .credentials-link {
+          color: #7C3AED;
+          font-weight: 500;
+          text-decoration: none;
+          border-bottom: 1px solid transparent;
+          transition: border-color 0.2s;
+        }
+
+        .credentials-link:hover {
+          border-bottom-color: #7C3AED;
+        }
+
+        .help-note {
+          font-size: 12px;
+          color: #666;
+          font-style: italic;
+        }
+
+        .help-note strong {
+          color: #ff9800;
+          font-style: normal;
+        }
+
+        input[type="password"] {
+          font-family: monospace;
+          letter-spacing: 0.05em;
         }
 
         .form-actions {

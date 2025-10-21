@@ -7,6 +7,8 @@ export interface Library {
   previewHost: string; // Default: derived from URL params, e.g., "https://xmc-canadianlif38a5-clhiaa22e-dev232a.sitecorecloud.io/"
   sitecoreItemId?: string; // The Sitecore item ID of the library folder
   sitecoreDataItemId?: string; // The Sitecore item ID of the Data item
+  client_id?: string; // Sitecore Cloud environment Client ID for automation credentials
+  client_secret?: string; // Sitecore Cloud environment Client Secret for automation credentials
 }
 
 export interface LibraryValidationResult {

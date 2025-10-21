@@ -4,9 +4,12 @@ import { supabase } from './supabase-client';
 
 //baseFolder is the path where we will store the images, it will appended with year, month, day, hour and random suffix
 //previewHost is the host of the preview environment, when appended with the image path, it will be the full URL of the image
+//clientId and clientSecret are OAuth2 credentials for Sitecore authentication
 export interface Config {
   baseFolder: string;
   previewHost: string;
+  clientId: string;
+  clientSecret: string;
 }
 
 /**
@@ -24,7 +27,7 @@ export async function getConfig(organizationId: string, key: string): Promise<Co
   try {
     const { data, error } = await supabase
       .from('libraries')
-      .select('folder, preview_host')
+      .select('folder, preview_host, client_id, client_secret')
       .eq('organization_id', organizationId)
       .eq('key', key)
       .eq('archived', false)
@@ -42,6 +45,8 @@ export async function getConfig(organizationId: string, key: string): Promise<Co
     return {
       baseFolder: data.folder,
       previewHost: data.preview_host,
+      clientId: data.client_id,
+      clientSecret: data.client_secret,
     };
   } catch (error) {
     console.error('Error in getConfig:', error);

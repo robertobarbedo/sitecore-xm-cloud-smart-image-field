@@ -95,7 +95,7 @@ graph LR
   key: "e3641953fabc471fb110d46241bce7a1",  // From URL
   image_item_path: "/sitecore/media library/...",  // From Sitecore
   image_item_id: "item-123",  // From Sitecore
-  image_preview_path: "https://.../-/jssmedia/...",  // Generated
+  image_preview_path: "https://.../-/media/...",  // Generated
   alt_text: "Beach sunset",  // User input
   description: "Beautiful sunset..."  // User input
 }

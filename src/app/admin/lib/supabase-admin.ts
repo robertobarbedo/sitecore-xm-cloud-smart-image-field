@@ -33,6 +33,8 @@ interface LibraryRow {
   name: string;
   folder: string;
   preview_host: string;
+  client_id?: string;
+  client_secret?: string;
   archived: boolean;
   created_at: string;
   updated_at: string;
@@ -47,6 +49,8 @@ function rowToLibrary(row: LibraryRow): Library {
     name: row.name,
     folder: row.folder,
     previewHost: row.preview_host,
+    client_id: row.client_id,
+    client_secret: row.client_secret,
   };
 }
 
@@ -136,6 +140,8 @@ export async function createLibrary(organizationId: string, marketplaceAppTenant
       name: library.name,
       folder: library.folder,
       preview_host: library.previewHost,
+      client_id: library.client_id || null,
+      client_secret: library.client_secret || null,
       archived: false,  // New libraries are not archived
     };
 
@@ -179,6 +185,8 @@ export async function updateLibrary(organizationId: string, marketplaceAppTenant
       name: library.name,
       folder: library.folder,
       preview_host: library.previewHost,
+      client_id: library.client_id || null,
+      client_secret: library.client_secret || null,
     };
 
     const { data, error } = await client

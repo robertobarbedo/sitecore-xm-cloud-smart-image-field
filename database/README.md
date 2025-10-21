@@ -89,7 +89,7 @@ SELECT upsert_image_metadata(
     'e3641953fabc471fb110d46241bce7a1',
     '/sitecore/media library/images/photo.jpg',
     'item-123',
-    'https://example.com/-/jssmedia/images/photo.jpg',
+    'https://example.com/-/media/images/photo.jpg',
     'Beach sunset',
     'Beautiful sunset over the beach with orange sky'
 );

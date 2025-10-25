@@ -7,11 +7,18 @@ import { getFolder, createFolder } from '@/src/lib/folder-manager';
 import { ImageSelector } from '@/src/components/ImageSelector';
 import { ImageFind } from '@/src/components/ImageFind';
 import { ImageMetadata } from '@/src/components/ImageMetadata';
+import { ImageCropping } from '@/src/components/ImageCropping';
 import { AppContext } from '@/src/components/AppContext';
 import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 import { upsertImageMetadata, getUrlParams } from '@/src/lib/supabase-client';
 
-type ActiveView = 'new' | 'find' | 'metadata' | 'appcontext';
+type ActiveView = 'new' | 'find' | 'metadata' | 'cropping' | 'appcontext';
+
+interface CroppedVersion {
+  path: string;
+  width: number;
+  height: number;
+}
 
 interface SelectedImage {
   path: string;
@@ -29,6 +36,7 @@ interface SelectedImage {
   mimeType?: string;
   focusX?: number;
   focusY?: number;
+  croppedVersions?: { [key: string]: CroppedVersion };
 }
 
 function CustomFieldExtension() {
@@ -112,13 +120,27 @@ function CustomFieldExtension() {
     }
 
     // Compare all fields
+    const croppedVersionsChanged = JSON.stringify(selectedImage.croppedVersions) !== JSON.stringify(initialImage.croppedVersions);
+    const hasCroppedVersions = selectedImage.croppedVersions && Object.keys(selectedImage.croppedVersions).length > 0;
+    
     const changed = 
       selectedImage.itemId !== initialImage.itemId ||
       selectedImage.itemPath !== initialImage.itemPath ||
       selectedImage.altText !== initialImage.altText ||
       selectedImage.description !== initialImage.description ||
       selectedImage.imageName !== initialImage.imageName ||
-      selectedImage.imageExtension !== initialImage.imageExtension;
+      selectedImage.imageExtension !== initialImage.imageExtension ||
+      selectedImage.focusX !== initialImage.focusX ||
+      selectedImage.focusY !== initialImage.focusY ||
+      croppedVersionsChanged;
+
+    console.log('Change detection:', {
+      changed,
+      croppedVersionsChanged,
+      hasCroppedVersions,
+      selectedCroppedVersions: selectedImage.croppedVersions,
+      initialCroppedVersions: initialImage.croppedVersions
+    });
 
     setHasChanges(changed);
   }, [selectedImage, initialImage]);
@@ -183,6 +205,14 @@ function CustomFieldExtension() {
   }, [client, isInitialized, error]);
 
   const handleSave = async () => {
+    console.log('handleSave called', { 
+      hasClient: !!client, 
+      hasSelectedImage: !!selectedImage, 
+      hasChanges,
+      selectedImage,
+      initialImage
+    });
+    
     if (!client || !selectedImage || !hasChanges) {
       alert('No changes to save');
       return;
@@ -191,9 +221,20 @@ function CustomFieldExtension() {
     try {
       console.log('Save is clicked, data to save:', selectedImage);
       
+      // Prepare data with calculated url field
+      const pathWithoutMediaLibrary = selectedImage.itemPath.replace(/^\/sitecore\/media library\//i, '');
+      
+      const dataToSave = {
+        ...selectedImage,
+        url: {
+          path: pathWithoutMediaLibrary
+        }
+      };
+      
+      console.log('Data with url field:', dataToSave);
+      
       // Save to Sitecore
-      const dataToSave = JSON.stringify(selectedImage);
-      await client.setValue(dataToSave, true);
+      await client.setValue(JSON.stringify(dataToSave), true);
       console.log('✅ Saved to Sitecore');
       
       // Save to Supabase for search functionality
@@ -254,6 +295,28 @@ function CustomFieldExtension() {
         ...(focusX !== undefined && { focusX }),
         ...(focusY !== undefined && { focusY })
       });
+    }
+  };
+
+  const handleFocalPointChange = (focusX: number, focusY: number) => {
+    if (selectedImage) {
+      setSelectedImage({
+        ...selectedImage,
+        focusX,
+        focusY
+      });
+    }
+  };
+
+  const handleCroppedVersionsChange = (croppedVersions: { [key: string]: CroppedVersion }) => {
+    console.log('handleCroppedVersionsChange called with:', croppedVersions);
+    if (selectedImage) {
+      const updated = {
+        ...selectedImage,
+        croppedVersions
+      };
+      console.log('Updating selectedImage with croppedVersions:', updated);
+      setSelectedImage(updated);
     }
   };
 
@@ -328,6 +391,13 @@ function CustomFieldExtension() {
             </button>
             <span className="separator">|</span>
             <button 
+              className={`tab-button ${activeView === 'cropping' ? 'active' : ''}`}
+              onClick={() => setActiveView('cropping')}
+            >
+              Cropping
+            </button>
+            <span className="separator">|</span>
+            <button 
               className={`tab-button ${activeView === 'appcontext' ? 'active' : ''}`}
               onClick={() => setActiveView('appcontext')}
             >
@@ -361,6 +431,14 @@ function CustomFieldExtension() {
               client={client} 
               selectedImage={selectedImage}
               onMetadataChange={handleMetadataChange}
+            />
+          )}
+          {activeView === 'cropping' && (
+            <ImageCropping 
+              selectedImage={selectedImage}
+              client={client}
+              onFocalPointChange={handleFocalPointChange}
+              onCroppedVersionsChange={handleCroppedVersionsChange}
             />
           )}
           {activeView === 'appcontext' && <AppContext />}

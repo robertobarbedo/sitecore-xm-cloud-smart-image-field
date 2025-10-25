@@ -24,9 +24,11 @@ interface ImageMetadataProps {
   client: ClientSDK;
   selectedImage: SelectedImage | null;
   onMetadataChange: (altText: string, description: string, focusX?: number, focusY?: number) => void;
+  autoCaption?: boolean;
+  onProcessingChange?: (isProcessing: boolean) => void;
 }
 
-export function ImageMetadata({ client, selectedImage, onMetadataChange }: ImageMetadataProps) {
+export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCaption, onProcessingChange }: ImageMetadataProps) {
   const [altText, setAltText] = useState('');
   const [description, setDescription] = useState('');
   const [focusX, setFocusX] = useState(0.5);
@@ -64,6 +66,14 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
     }
   }, [selectedImage]);
 
+  // Auto-trigger AI caption when autoCaption is enabled
+  useEffect(() => {
+    if (autoCaption && selectedImage && !selectedImage.altText && !isAnalyzing) {
+      console.log('Auto-triggering AI caption');
+      handleFillWithAI();
+    }
+  }, [autoCaption, selectedImage]);
+
   const handleAltTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAltText(value);
@@ -84,6 +94,7 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
 
     setIsAnalyzing(true);
     setAiError(''); // Clear previous errors
+    onProcessingChange?.(true); // Notify parent
     
     try {
       console.log('Fetching image for AI analysis:', selectedImage.previewUrl);
@@ -172,6 +183,7 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange }: Image
       setAiError(errorMessage);
     } finally {
       setIsAnalyzing(false);
+      onProcessingChange?.(false); // Notify parent
     }
   };
 

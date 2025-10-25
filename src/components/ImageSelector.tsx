@@ -12,6 +12,7 @@ import { RecommendedInfoPanel } from './RecommendedInfoPanel';
 interface ImageSelectorProps {
   client: ClientSDK;
   onImageSelected?: (imageData: UploadedImageData) => void;
+  onProcessingChange?: (isProcessing: boolean) => void;
 }
 
 interface UploadedImageData {
@@ -32,7 +33,7 @@ interface UploadedImageData {
   focusY?: number;
 }
 
-export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
+export function ImageSelector({ client, onImageSelected, onProcessingChange }: ImageSelectorProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
@@ -211,6 +212,7 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
 
     setIsUploading(true);
     setUploadStatus('Preparing upload...');
+    onProcessingChange?.(true);
 
     try {
       // Create preview URL
@@ -303,6 +305,7 @@ export function ImageSelector({ client, onImageSelected }: ImageSelectorProps) {
       setUploadStatus(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
+      onProcessingChange?.(false);
     }
   };
 

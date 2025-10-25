@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CropConfig {
   label: string;
@@ -43,6 +43,8 @@ interface ImageCroppingProps {
   onFocalPointChange?: (focusX: number, focusY: number) => void;
   onCroppedVersionsChange?: (croppedVersions: { [key: string]: CroppedVersion }) => void;
   client?: any;
+  autoCrop?: boolean;
+  onProcessingChange?: (isProcessing: boolean) => void;
 }
 
 interface FocalPoint {
@@ -50,7 +52,7 @@ interface FocalPoint {
   y: number; // percentage 0-1
 }
 
-export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVersionsChange, client }: ImageCroppingProps) {
+export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVersionsChange, client, autoCrop, onProcessingChange }: ImageCroppingProps) {
   const [cropConfigs, setCropConfigs] = useState<CropConfigs>({});
   const imageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,6 +67,7 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
   const [croppedVersionPaths, setCroppedVersionPaths] = useState<{ [key: string]: CroppedVersion }>({});
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [hasAutoUploaded, setHasAutoUploaded] = useState(false); // Track if auto-upload has occurred
 
   // Parse query string parameters on mount
   useEffect(() => {
@@ -201,6 +204,15 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
     }
   }, [proxiedImageUrl, cropConfigs]);
 
+  // Auto-trigger upload when autoCrop is enabled and crops are generated (only once on initial load)
+  useEffect(() => {
+    if (autoCrop && Object.keys(croppedImages).length > 0 && Object.keys(croppedVersionPaths).length === 0 && !isUploading && client && !hasAutoUploaded) {
+      console.log('Auto-triggering crop upload (first time only)');
+      setHasAutoUploaded(true); // Mark that auto-upload has occurred
+      uploadCroppedVersions();
+    }
+  }, [autoCrop, croppedImages, croppedVersionPaths, isUploading, client, hasAutoUploaded]);
+
   const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!imageRef.current) return;
 
@@ -210,6 +222,10 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
 
     setFocalPoint({ x, y });
     generateAllCrops(x, y);
+    
+    // Reset uploaded versions to allow re-upload with new focal point
+    setCroppedVersionPaths({});
+    setUploadStatus('');
     
     // Notify parent component of focal point change
     if (onFocalPointChange) {
@@ -425,7 +441,7 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
     }
   };
 
-  const uploadCroppedVersions = async () => {
+  const uploadCroppedVersions = useCallback(async () => {
     if (!selectedImage?.itemPath || !client || Object.keys(croppedImages).length === 0) {
       console.log('Cannot upload: missing dependencies');
       return;
@@ -433,6 +449,7 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
 
     setIsUploading(true);
     setUploadStatus('Uploading cropped versions...');
+    onProcessingChange?.(true); // Notify parent
 
     try {
       const newCroppedVersionPaths: { [key: string]: CroppedVersion } = {};
@@ -495,8 +512,9 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
       setUploadStatus(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
+      onProcessingChange?.(false); // Notify parent
     }
-  };
+  }, [selectedImage, client, croppedImages, cropConfigs, onProcessingChange, onCroppedVersionsChange]);
 
   const hasCropConfigs = Object.keys(cropConfigs).length > 0;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useMarketplaceClient } from '@/src/utils/hooks/useMarketplaceClient';
 import { getConfig } from '@/src/lib/config';
 import { getFolder, createFolder } from '@/src/lib/folder-manager';
@@ -13,6 +13,8 @@ import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 import { upsertImageMetadata, getUrlParams } from '@/src/lib/supabase-client';
 
 type ActiveView = 'new' | 'find' | 'metadata' | 'cropping' | 'appcontext';
+
+type WizardStep = 'new' | 'metadata' | 'cropping';
 
 interface CroppedVersion {
   path: string;
@@ -48,6 +50,39 @@ function CustomFieldExtension() {
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
   const [initialImage, setInitialImage] = useState<SelectedImage | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  
+  // New Image Flow wizard state
+  const [isNewImageFlow, setIsNewImageFlow] = useState(false);
+  const [wizardStep, setWizardStep] = useState<WizardStep>('new');
+  const [wizardSteps, setWizardSteps] = useState<WizardStep[]>([]);
+  const [autoCaptionEnabled, setAutoCaptionEnabled] = useState(false);
+  const [autoCropEnabled, setAutoCropEnabled] = useState(false);
+  const [hasCroppingConfig, setHasCroppingConfig] = useState(false);
+  
+  // Processing indicators
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Initialize wizard configuration from query string
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    // Check for auto caption
+    const acapt = params.get('acapt');
+    setAutoCaptionEnabled(acapt === '1');
+    
+    // Check for auto crop
+    const acrop = params.get('acrop');
+    setAutoCropEnabled(acrop === '1');
+    
+    // Check if cropping configs exist
+    const vmobile = params.get('vmobile');
+    const vtablet = params.get('vtablet');
+    const vdesksmall = params.get('vdesksmall');
+    const hasCropping = !!(vmobile || vtablet || vdesksmall);
+    setHasCroppingConfig(hasCropping);
+    
+    console.log('Wizard config:', { acapt, acrop, hasCropping });
+  }, []);
 
   // Load existing field value when component opens
   useEffect(() => {
@@ -282,8 +317,102 @@ function CustomFieldExtension() {
 
   const handleImageSelected = (imageData: SelectedImage) => {
     setSelectedImage(imageData);
-    // Automatically switch to Metadata tab when an image is selected or uploaded
+    
+    // Enter New Image Flow wizard
+    setIsNewImageFlow(true);
+    
+    // Build wizard steps based on configuration
+    const steps: WizardStep[] = ['new', 'metadata'];
+    if (hasCroppingConfig) {
+      steps.push('cropping');
+    }
+    setWizardSteps(steps);
+    setWizardStep('metadata'); // Move to metadata after upload
     setActiveView('metadata');
+    
+    console.log('Entering New Image Flow with steps:', steps);
+  };
+
+  const handleNext = async () => {
+    const currentIndex = wizardSteps.indexOf(wizardStep);
+    const isLastStep = currentIndex === wizardSteps.length - 1;
+    
+    if (isLastStep) {
+      // Final step - save and close
+      await handleSaveAndClose();
+    } else {
+      // Save current progress and move to next step
+      await handleSaveProgress();
+      const nextStep = wizardSteps[currentIndex + 1];
+      setWizardStep(nextStep);
+      setActiveView(nextStep);
+      console.log('Moving to next wizard step:', nextStep);
+    }
+  };
+
+  const handleSaveProgress = async () => {
+    if (!client || !selectedImage) return;
+    
+    try {
+      const pathWithoutMediaLibrary = selectedImage.itemPath.replace(/^\/sitecore\/media library\//i, '');
+      
+      const dataToSave = {
+        ...selectedImage,
+        url: {
+          path: pathWithoutMediaLibrary
+        }
+      };
+      
+      await client.setValue(JSON.stringify(dataToSave), true);
+      console.log('✅ Progress saved');
+      
+      // Update initial image
+      setInitialImage(selectedImage);
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Save progress error:', error);
+      throw error;
+    }
+  };
+
+  const handleSaveAndClose = async () => {
+    if (!client || !selectedImage) return;
+    
+    try {
+      await handleSaveProgress();
+      
+      // Save to Supabase
+      const params = getUrlParams();
+      if (params && selectedImage.previewUrl) {
+        const result = await upsertImageMetadata({
+          organization_id: params.organizationId,
+          key: params.key,
+          image_item_path: selectedImage.itemPath,
+          image_item_id: selectedImage.itemId,
+          image_preview_path: selectedImage.previewUrl,
+          alt_text: selectedImage.altText,
+          description: selectedImage.description,
+          image_name: selectedImage.imageName,
+          image_extension: selectedImage.imageExtension,
+          width: selectedImage.width,
+          height: selectedImage.height,
+          size_kb: selectedImage.sizeKb,
+          aspect_ratio: selectedImage.aspectRatio,
+          mime_type: selectedImage.mimeType,
+          focus_x: selectedImage.focusX,
+          focus_y: selectedImage.focusY
+        });
+        
+        if (result.success) {
+          console.log('✅ Saved to Supabase with ID:', result.id);
+        }
+      }
+      
+      client.closeApp();
+    } catch (error) {
+      console.error('Save and close error:', error);
+      alert(`Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   const handleMetadataChange = (altText: string, description: string, focusX?: number, focusY?: number) => {
@@ -363,74 +492,121 @@ function CustomFieldExtension() {
 
   // Show main interface if environment is ready
   if (client) {
+    const currentStepIndex = wizardSteps.indexOf(wizardStep);
+    const isLastStep = currentStepIndex === wizardSteps.length - 1;
+    
     return (
       <div className="app-container">
         {/* Top Toolbar */}
         <div className="toolbar">
           {/* Left side - Navigation */}
           <div className="toolbar-left">
-            <button 
-              className={`tab-button ${activeView === 'new' ? 'active' : ''}`}
-              onClick={() => setActiveView('new')}
-            >
-              New
-            </button>
-            <span className="separator">|</span>
-            <button 
-              className={`tab-button ${activeView === 'find' ? 'active' : ''}`}
-              onClick={() => setActiveView('find')}
-            >
-              Find
-            </button>
-            <span className="separator">|</span>
-            <button 
-              className={`tab-button ${activeView === 'metadata' ? 'active' : ''}`}
-              onClick={() => setActiveView('metadata')}
-            >
-              Metadata
-            </button>
-            <span className="separator">|</span>
-            <button 
-              className={`tab-button ${activeView === 'cropping' ? 'active' : ''}`}
-              onClick={() => setActiveView('cropping')}
-            >
-              Cropping
-            </button>
-            <span className="separator">|</span>
-            <button 
-              className={`tab-button ${activeView === 'appcontext' ? 'active' : ''}`}
-              onClick={() => setActiveView('appcontext')}
-            >
-              AppContext
-            </button>
+            {isNewImageFlow ? (
+              /* Wizard Mode */
+              <>
+                {wizardSteps.map((step, index) => (
+                  <Fragment key={step}>
+                    {index > 0 && <span className="separator">→</span>}
+                    <button 
+                      className={`tab-button ${wizardStep === step ? 'active' : ''} ${index < currentStepIndex ? 'completed' : ''} ${index > currentStepIndex ? 'disabled' : ''}`}
+                      onClick={() => {
+                        // Allow going back to previous steps
+                        if (index <= currentStepIndex) {
+                          setWizardStep(step);
+                          setActiveView(step);
+                        }
+                      }}
+                      disabled={index > currentStepIndex}
+                    >
+                      {step === 'new' ? 'New' : step === 'metadata' ? 'Metadata' : 'Cropping'}
+                    </button>
+                  </Fragment>
+                ))}
+              </>
+            ) : (
+              /* Regular Mode */
+              <>
+                <button 
+                  className={`tab-button ${activeView === 'new' ? 'active' : ''}`}
+                  onClick={() => setActiveView('new')}
+                >
+                  New
+                </button>
+                <span className="separator">|</span>
+                <button 
+                  className={`tab-button ${activeView === 'find' ? 'active' : ''}`}
+                  onClick={() => setActiveView('find')}
+                >
+                  Find
+                </button>
+                <span className="separator">|</span>
+                <button 
+                  className={`tab-button ${activeView === 'metadata' ? 'active' : ''}`}
+                  onClick={() => setActiveView('metadata')}
+                >
+                  Metadata
+                </button>
+                <span className="separator">|</span>
+                <button 
+                  className={`tab-button ${activeView === 'cropping' ? 'active' : ''}`}
+                  onClick={() => setActiveView('cropping')}
+                >
+                  Cropping
+                </button>
+                <span className="separator">|</span>
+                <button 
+                  className={`tab-button ${activeView === 'appcontext' ? 'active' : ''}`}
+                  onClick={() => setActiveView('appcontext')}
+                >
+                  AppContext
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Right side - Thumbnail and Save */}
+          {/* Right side - Thumbnail and Save/Next */}
           <div className="toolbar-right">
+            {isProcessing && (
+              <div className="processing-indicator">
+                <div className="spinner"></div>
+              </div>
+            )}
             {selectedImage?.previewUrl && (
               <div className="thumbnail-preview">
                 <img src={selectedImage.previewUrl} alt="Selected" />
               </div>
             )}
-            <button 
-              className="save-button"
-              onClick={handleSave}
-              disabled={!hasChanges}
-            >
-              Save
-            </button>
+            {isNewImageFlow ? (
+              <button 
+                className="save-button"
+                onClick={handleNext}
+                disabled={!selectedImage}
+              >
+                {isLastStep ? 'Save' : 'Next'}
+              </button>
+            ) : (
+              <button 
+                className="save-button"
+                onClick={handleSave}
+                disabled={!hasChanges}
+              >
+                Save
+              </button>
+            )}
           </div>
         </div>
 
         {/* Content Area */}
         <div className="content-area">
-          {activeView === 'new' && <ImageSelector client={client} onImageSelected={handleImageSelected} />}
+          {activeView === 'new' && <ImageSelector client={client} onImageSelected={handleImageSelected} onProcessingChange={setIsProcessing} />}
           {activeView === 'find' && <ImageFind client={client} onImageSelected={handleImageSelected} />}
           {activeView === 'metadata' && (
             <ImageMetadata 
               client={client} 
               selectedImage={selectedImage}
               onMetadataChange={handleMetadataChange}
+              autoCaption={isNewImageFlow && autoCaptionEnabled}
+              onProcessingChange={setIsProcessing}
             />
           )}
           {activeView === 'cropping' && (
@@ -439,6 +615,8 @@ function CustomFieldExtension() {
               client={client}
               onFocalPointChange={handleFocalPointChange}
               onCroppedVersionsChange={handleCroppedVersionsChange}
+              autoCrop={isNewImageFlow && autoCropEnabled}
+              onProcessingChange={setIsProcessing}
             />
           )}
           {activeView === 'appcontext' && <AppContext />}
@@ -492,6 +670,21 @@ function CustomFieldExtension() {
 
           .tab-button.active {
             color: #1e90ff;
+            font-weight: 500;
+          }
+
+          .tab-button.completed {
+            color: #10b981;
+          }
+
+          .tab-button.disabled {
+            color: #d0d0d0;
+            cursor: not-allowed;
+          }
+
+          .tab-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
           }
 
           .separator {
@@ -505,6 +698,27 @@ function CustomFieldExtension() {
             display: flex;
             align-items: center;
             gap: 10px;
+          }
+
+          .processing-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #7C3AED;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
           }
 
           .thumbnail-preview {

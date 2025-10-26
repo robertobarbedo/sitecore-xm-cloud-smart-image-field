@@ -50,7 +50,6 @@ export function LibraryList({ libraries, onEdit, onArchive, onGenerateUrl, isLoa
           <tr>
             <th>Name</th>
             <th>Folder</th>
-            <th>Preview Host</th>
             <th>Key</th>
             <th>Actions</th>
           </tr>
@@ -66,7 +65,6 @@ export function LibraryList({ libraries, onEdit, onArchive, onGenerateUrl, isLoa
                   {isMainLibrary && <span className="badge">Main</span>}
                 </td>
                 <td className="folder-cell">{library.folder}</td>
-                <td className="host-cell">{library.previewHost}</td>
                 <td className="key-cell">{library.key}</td>
                 <td>
                   <div className="actions-cell">
@@ -155,9 +153,8 @@ export function LibraryList({ libraries, onEdit, onArchive, onGenerateUrl, isLoa
           letter-spacing: 0.03125rem;
         }
 
-        .folder-cell,
-        .host-cell {
-          max-width: 200px;
+        .folder-cell {
+          max-width: 300px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;

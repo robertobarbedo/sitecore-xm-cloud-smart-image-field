@@ -285,12 +285,12 @@ export async function listLibraries(client: ClientSDK): Promise<Library[]> {
       
       if (dataItem?.value?.value) {
         const parts = dataItem.value.value.split('|');
-        if (parts.length === 4) {
+        // Support both old format (4 parts with previewHost) and new format (3 parts)
+        if (parts.length >= 3) {
           libraries.push({
             key: parts[0],
             name: parts[1],
             folder: parts[2],
-            previewHost: parts[3],
             sitecoreItemId: folder.itemId,
             sitecoreDataItemId: dataItem.itemId,
           });
@@ -357,7 +357,7 @@ export async function createLibrary(client: ClientSDK, library: Library): Promis
 
   // Create the Data item
   console.log('⏳ Creating library data item...');
-  const dataValue = `${library.key}|${library.name}|${library.folder}|${library.previewHost}`;
+  const dataValue = `${library.key}|${library.name}|${library.folder}`;
   const dataMutation = {
     query: `
       mutation {
@@ -415,7 +415,7 @@ export async function updateLibrary(client: ClientSDK, library: Library): Promis
 
   console.log(`⏳ Updating library: ${library.name}...`);
   
-  const dataValue = `${library.key}|${library.name}|${library.folder}|${library.previewHost}`;
+  const dataValue = `${library.key}|${library.name}|${library.folder}`;
   const graphqlMutation = {
     query: `
       mutation {

@@ -32,9 +32,6 @@ interface LibraryRow {
   key: string;
   name: string;
   folder: string;
-  preview_host: string;
-  client_id?: string;
-  client_secret?: string;
   archived: boolean;
   created_at: string;
   updated_at: string;
@@ -48,9 +45,6 @@ function rowToLibrary(row: LibraryRow): Library {
     key: row.key,
     name: row.name,
     folder: row.folder,
-    previewHost: row.preview_host,
-    client_id: row.client_id,
-    client_secret: row.client_secret,
   };
 }
 
@@ -133,21 +127,18 @@ export async function createLibrary(organizationId: string, marketplaceAppTenant
     
     const client = getSupabaseClient();
     
-    const row: Omit<LibraryRow, 'created_at' | 'updated_at'> = {
+    const row = {
       organization_id: organizationId,
       marketplace_app_tenant_id: marketplaceAppTenantId,
       key: library.key,
       name: library.name,
       folder: library.folder,
-      preview_host: library.previewHost,
-      client_id: library.client_id || null,
-      client_secret: library.client_secret || null,
       archived: false,  // New libraries are not archived
     };
 
     const { data, error } = await client
       .from('libraries')
-      .insert(row)
+      .insert(row as any)
       .select()
       .single();
 
@@ -184,13 +175,10 @@ export async function updateLibrary(organizationId: string, marketplaceAppTenant
     const updates = {
       name: library.name,
       folder: library.folder,
-      preview_host: library.previewHost,
-      client_id: library.client_id || null,
-      client_secret: library.client_secret || null,
     };
 
-    const { data, error } = await client
-      .from('libraries')
+    const { data, error } = await (client
+      .from('libraries') as any)
       .update(updates)
       .eq('organization_id', organizationId)
       .eq('marketplace_app_tenant_id', marketplaceAppTenantId)
@@ -226,8 +214,8 @@ export async function archiveLibrary(organizationId: string, marketplaceAppTenan
   try {
     const client = getSupabaseClient();
     
-    const { error } = await client
-      .from('libraries')
+    const { error } = await (client
+      .from('libraries') as any)
       .update({ archived: true })
       .eq('organization_id', organizationId)
       .eq('marketplace_app_tenant_id', marketplaceAppTenantId)

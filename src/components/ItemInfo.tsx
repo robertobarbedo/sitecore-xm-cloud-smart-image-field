@@ -183,51 +183,54 @@ export function ItemInfo({ itemId = "{AC5FDC0C-F33B-4524-B6F7-AA2E42CF857A}" }: 
       
       <style jsx>{`
         .item-info {
-          margin: 20px 0;
-          padding: 15px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          background-color: #f9f9f9;
+          margin: 1.25rem 0;
+          padding: 0.9375rem;
+          border: 1px solid #E9E9E9;
+          border-radius: 0.5rem;
+          background-color: #F7F7F7;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
         
         .item-details {
-          margin-top: 10px;
+          margin-top: 0.625rem;
         }
         
         .item-field {
-          margin: 8px 0;
-          padding: 5px 0;
+          margin: 0.5rem 0;
+          padding: 0.3125rem 0;
         }
         
         .item-field strong {
           display: inline-block;
           min-width: 120px;
-          color: #333;
+          color: #3B3B3B;
+          font-weight: 500;
         }
         
         .fields-list {
-          margin-top: 10px;
-          padding-left: 20px;
+          margin-top: 0.625rem;
+          padding-left: 1.25rem;
         }
         
         .field-item {
-          margin: 5px 0;
-          padding: 3px 0;
-          border-bottom: 1px solid #eee;
+          margin: 0.3125rem 0;
+          padding: 0.1875rem 0;
+          border-bottom: 1px solid #E9E9E9;
         }
         
         .field-name {
-          font-weight: bold;
-          color: #555;
-          margin-right: 10px;
+          font-weight: 500;
+          color: #717171;
+          margin-right: 0.625rem;
         }
         
         .field-value {
-          color: #666;
-          font-family: monospace;
-          background-color: #f0f0f0;
-          padding: 2px 6px;
-          border-radius: 3px;
+          color: #717171;
+          font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+          background-color: #EDEDED;
+          padding: 0.125rem 0.375rem;
+          border-radius: 0.1875rem;
+          font-size: 0.8125rem;
         }
       `}</style>
     </div>

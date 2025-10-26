@@ -37,11 +37,12 @@ export function AppContext({ onContextLoaded }: AppContextProps) {
         <p>Initializing extension...</p>
         <style jsx>{`
           .application-context {
-            padding: 16px;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
           }
           .application-context p {
-            color: #666;
-            font-size: 13px;
+            color: #717171;
+            font-size: 0.8125rem;
             margin: 0;
           }
         `}</style>
@@ -55,10 +56,11 @@ export function AppContext({ onContextLoaded }: AppContextProps) {
         <p style={{ color: "#d32f2f" }}>Error: {String(error)}</p>
         <style jsx>{`
           .application-context {
-            padding: 16px;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
           }
           .application-context p {
-            font-size: 13px;
+            font-size: 0.8125rem;
             margin: 0;
           }
         `}</style>
@@ -99,37 +101,38 @@ export function AppContext({ onContextLoaded }: AppContextProps) {
       
       <style jsx>{`
         .application-context {
-          padding: 16px;
+          padding: 1rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
         
         .context-section h3 {
-          color: #333;
-          font-size: 14px;
+          color: #3B3B3B;
+          font-size: 0.875rem;
           font-weight: 600;
-          margin: 0 0 12px 0;
+          margin: 0 0 0.75rem 0;
         }
         
         .context-details {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 0.625rem;
         }
         
         .detail-item {
-          font-size: 13px;
+          font-size: 0.8125rem;
         }
         
         .detail-label {
           display: block;
-          color: #666;
+          color: #717171;
           font-weight: 400;
-          margin-bottom: 4px;
+          margin-bottom: 0.25rem;
         }
         
         .detail-value {
-          color: #333;
+          color: #3B3B3B;
           word-break: break-all;
-          font-size: 12px;
+          font-size: 0.75rem;
         }
       `}</style>
     </div>

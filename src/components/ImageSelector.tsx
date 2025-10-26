@@ -412,13 +412,14 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
 
       <style jsx>{`
         .image-selector-container {
-          padding: 16px;
+          padding: 1rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
         .recommendations-wrapper {
           display: flex;
           justify-content: center;
-          margin-bottom: 12px;
+          margin-bottom: 0.75rem;
         }
         
         .upload-section {
@@ -426,13 +427,13 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
         }
         
         .drop-zone {
-          border: 1px dashed #d0d0d0;
-          border-radius: 2px;
-          padding: 24px;
+          border: 1px dashed #D8D8D8;
+          border-radius: 0.375rem;
+          padding: 1.5rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.2s;
-          background-color: #fafafa;
+          background-color: #F7F7F7;
           position: relative;
           min-height: 120px;
           display: flex;
@@ -441,31 +442,34 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
         }
         
         .drop-zone.drag-over {
-          border-color: #1e90ff;
-          background-color: #f0f8ff;
+          border-color: #6E3FFF;
+          background-color: #F7F6FF;
+          border-width: 2px;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.6);
         }
         
         .drop-zone.uploading {
           cursor: not-allowed;
+          opacity: 0.6;
         }
         
         .drop-zone-content {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: 0.5rem;
         }
         
         .upload-icon {
-          color: #999;
+          color: #8E8E8E;
           display: flex;
           align-items: center;
           justify-content: center;
         }
         
         .upload-text {
-          color: #666;
-          font-size: 13px;
+          color: #717171;
+          font-size: 0.8125rem;
         }
         
         .preview-container {
@@ -474,33 +478,35 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: 0.5rem;
         }
         
         .preview-image {
           max-width: 100%;
           max-height: 200px;
           object-fit: contain;
+          border-radius: 0.375rem;
         }
         
         .upload-progress {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 12px;
-          color: #666;
+          gap: 0.5rem;
+          font-size: 0.75rem;
+          color: #717171;
         }
         
         .upload-success {
-          color: #4caf50;
-          font-size: 12px;
+          color: #0EA184;
+          font-size: 0.75rem;
+          font-weight: 500;
         }
         
         .spinner {
-          width: 14px;
-          height: 14px;
-          border: 2px solid #e0e0e0;
-          border-top: 2px solid #1e90ff;
+          width: 0.875rem;
+          height: 0.875rem;
+          border: 2px solid #E9E9E9;
+          border-top: 2px solid #6E3FFF;
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
@@ -511,10 +517,12 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
         }
         
         .status-message {
-          margin-top: 12px;
-          padding: 8px;
-          font-size: 12px;
-          color: #666;
+          margin-top: 0.75rem;
+          padding: 0.5rem;
+          font-size: 0.75rem;
+          color: #717171;
+          background-color: #F7F7F7;
+          border-radius: 0.25rem;
         }
       `}</style>
     </div>

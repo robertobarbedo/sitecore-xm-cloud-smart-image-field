@@ -204,15 +204,6 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
     }
   }, [proxiedImageUrl, cropConfigs]);
 
-  // Auto-trigger upload when autoCrop is enabled and crops are generated (only once on initial load)
-  useEffect(() => {
-    if (autoCrop && Object.keys(croppedImages).length > 0 && Object.keys(croppedVersionPaths).length === 0 && !isUploading && client && !hasAutoUploaded) {
-      console.log('Auto-triggering crop upload (first time only)');
-      setHasAutoUploaded(true); // Mark that auto-upload has occurred
-      uploadCroppedVersions();
-    }
-  }, [autoCrop, croppedImages, croppedVersionPaths, isUploading, client, hasAutoUploaded]);
-
   const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!imageRef.current) return;
 
@@ -226,6 +217,7 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
     // Reset uploaded versions to allow re-upload with new focal point
     setCroppedVersionPaths({});
     setUploadStatus('');
+    setHasAutoUploaded(false); // Reset auto-upload flag to allow manual re-upload
     
     // Notify parent component of focal point change
     if (onFocalPointChange) {
@@ -516,6 +508,15 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
     }
   }, [selectedImage, client, croppedImages, cropConfigs, onProcessingChange, onCroppedVersionsChange]);
 
+  // Auto-trigger upload when autoCrop is enabled and crops are generated (only once on initial load)
+  useEffect(() => {
+    if (autoCrop && Object.keys(croppedImages).length > 0 && Object.keys(croppedVersionPaths).length === 0 && !isUploading && client && !hasAutoUploaded) {
+      console.log('Auto-triggering crop upload (first time only)');
+      setHasAutoUploaded(true); // Mark that auto-upload has occurred
+      uploadCroppedVersions();
+    }
+  }, [autoCrop, croppedImages, croppedVersionPaths, isUploading, client, hasAutoUploaded, uploadCroppedVersions]);
+
   const hasCropConfigs = Object.keys(cropConfigs).length > 0;
 
   if (!selectedImage) {
@@ -527,13 +528,14 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
 
         <style jsx>{`
           .image-cropping-container {
-            padding: 16px;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
           }
 
           .no-image-message {
-            color: #666;
-            font-size: 13px;
-            padding: 16px;
+            color: #717171;
+            font-size: 0.8125rem;
+            padding: 1rem;
           }
 
           .no-image-message p {
@@ -554,22 +556,23 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
 
         <style jsx>{`
           .image-cropping-container {
-            padding: 16px;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
           }
 
           .no-config-message {
-            color: #666;
-            font-size: 13px;
-            padding: 16px;
+            color: #717171;
+            font-size: 0.8125rem;
+            padding: 1rem;
           }
 
           .no-config-message p {
-            margin: 0 0 8px 0;
+            margin: 0 0 0.5rem 0;
           }
 
           .hint {
-            font-size: 12px;
-            color: #999;
+            font-size: 0.75rem;
+            color: #B5B5B5;
           }
         `}</style>
       </div>
@@ -667,54 +670,55 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
 
       <style jsx>{`
         .image-cropping-container {
-          padding: 16px;
+          padding: 1rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
         .crop-controls {
-          margin-bottom: 20px;
-          padding-bottom: 16px;
-          border-bottom: 1px solid #e5e5e5;
+          margin-bottom: 1.25rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #E9E9E9;
         }
 
         .instructions {
-          color: #666;
-          font-size: 13px;
+          color: #717171;
+          font-size: 0.8125rem;
           font-style: italic;
-          padding: 8px 12px;
-          background-color: #f0f8ff;
-          border-radius: 4px;
-          border: 1px solid #d0e8ff;
-          margin-bottom: 16px;
+          padding: 0.5rem 0.75rem;
+          background-color: #F7F6FF;
+          border-radius: 0.375rem;
+          border: 1px solid #D9D4FF;
+          margin-bottom: 1rem;
         }
 
         .upload-section-top {
           text-align: center;
-          padding: 16px 0;
+          padding: 1rem 0;
         }
 
         .image-editor {
-          margin-bottom: 24px;
+          margin-bottom: 1.5rem;
         }
 
         .image-editor h3 {
-          margin: 0 0 12px 0;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
+          margin: 0 0 0.75rem 0;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #3B3B3B;
         }
 
         .loading-message {
-          padding: 16px;
+          padding: 1rem;
           text-align: center;
-          color: #666;
-          font-size: 13px;
+          color: #717171;
+          font-size: 0.8125rem;
         }
 
         .cropper-wrapper {
-          background-color: #fafafa;
-          border: 1px solid #e5e5e5;
-          border-radius: 4px;
-          padding: 12px;
+          background-color: #F7F7F7;
+          border: 1px solid #E9E9E9;
+          border-radius: 0.5rem;
+          padding: 0.75rem;
           height: 70vh;
           overflow: auto;
           position: relative;
@@ -746,7 +750,7 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
         .focal-point-inner::after {
           content: '';
           position: absolute;
-          background-color: #1e90ff;
+          background-color: #6E3FFF;
         }
 
         .focal-point-inner::before {
@@ -774,58 +778,64 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
           width: 12px;
           height: 12px;
           border-radius: 50%;
-          background-color: #1e90ff;
+          background-color: #6E3FFF;
           border: 2px solid white;
-          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .cropped-previews {
-          margin-top: 24px;
-          padding-top: 24px;
-          border-top: 1px solid #e5e5e5;
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #E9E9E9;
         }
 
         .cropped-previews h3 {
-          margin: 0 0 16px 0;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333;
+          margin: 0 0 1rem 0;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #3B3B3B;
         }
 
         .previews-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 16px;
+          gap: 1rem;
         }
 
         .preview-item {
-          border: 1px solid #e5e5e5;
-          border-radius: 4px;
+          border: 1px solid #E9E9E9;
+          border-radius: 0.375rem;
           overflow: hidden;
-          background-color: #ffffff;
+          background-color: #FFFFFF;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          transition: box-shadow 0.2s;
+        }
+
+        .preview-item:hover {
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .preview-label {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 10px 12px;
-          background-color: #fafafa;
-          border-bottom: 1px solid #e5e5e5;
-          font-size: 13px;
+          padding: 0.625rem 0.75rem;
+          background-color: #F7F7F7;
+          border-bottom: 1px solid #E9E9E9;
+          font-size: 0.8125rem;
           font-weight: 500;
-          color: #333;
+          color: #3B3B3B;
         }
 
         .preview-dimensions {
-          font-size: 11px;
+          font-size: 0.6875rem;
           font-weight: 400;
-          color: #666;
+          color: #717171;
         }
 
         .preview-image-wrapper {
-          padding: 12px;
-          background-color: #fafafa;
+          padding: 0.75rem;
+          background-color: #F7F7F7;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -836,47 +846,58 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
           max-width: 100%;
           height: auto;
           display: block;
-          border: 1px solid #e5e5e5;
+          border: 1px solid #E9E9E9;
+          border-radius: 0.25rem;
         }
 
         .upload-button {
-          padding: 10px 20px;
-          background-color: #0078d4;
+          padding: 0.625rem 1.25rem;
+          background-color: #6E3FFF;
           color: white;
           border: none;
-          border-radius: 4px;
-          font-size: 14px;
+          border-radius: 9999px;
+          font-size: 0.875rem;
           font-weight: 500;
           cursor: pointer;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
         .upload-button:hover:not(:disabled) {
-          background-color: #106ebe;
+          background-color: #5319E0;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          transform: translateY(-1px);
+        }
+
+        .upload-button:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
         .upload-button:disabled {
-          background-color: #cccccc;
+          background-color: #E9E9E9;
+          color: #B5B5B5;
           cursor: not-allowed;
+          box-shadow: none;
         }
 
         .upload-status {
-          margin-top: 12px;
-          padding: 8px 12px;
-          border-radius: 4px;
-          font-size: 13px;
+          margin-top: 0.75rem;
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.375rem;
+          font-size: 0.8125rem;
         }
 
         .upload-status.success {
-          background-color: #dff6dd;
-          color: #107c10;
-          border: 1px solid #9fd89c;
+          background-color: #E8FCF5;
+          color: #007F66;
+          border: 1px solid #8BEBD0;
         }
 
         .upload-status.error {
-          background-color: #fde7e9;
-          color: #a80000;
-          border: 1px solid #f1aeb5;
+          background-color: #FFF5F4;
+          color: #D92739;
+          border: 1px solid #FFE4E2;
         }
       `}</style>
     </div>

@@ -196,13 +196,14 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
         
         <style jsx>{`
           .image-metadata-container {
-            padding: 16px;
+            padding: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
           }
           
           .no-image-message {
-            color: #666;
-            font-size: 13px;
-            padding: 16px;
+            color: #717171;
+            font-size: 0.8125rem;
+            padding: 1rem;
           }
           
           .no-image-message p {
@@ -337,61 +338,71 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
       
       <style jsx>{`
         .image-metadata-container {
-          padding: 16px;
+          padding: 1rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
         .image-preview {
-          margin-bottom: 16px;
-          border: 1px solid #e5e5e5;
-          background-color: #fafafa;
-          padding: 12px;
+          margin-bottom: 1rem;
+          border: 1px solid #E9E9E9;
+          background-color: #F7F7F7;
+          padding: 0.75rem;
           text-align: center;
+          border-radius: 0.375rem;
         }
 
         .image-preview img {
           max-width: 100%;
           max-height: 200px;
           object-fit: contain;
+          border-radius: 0.25rem;
         }
 
         .metadata-form {
-          background-color: #ffffff;
+          background-color: #FFFFFF;
         }
 
         .form-group {
-          margin-bottom: 16px;
+          margin-bottom: 1rem;
         }
 
         .button-group {
           display: flex;
           justify-content: flex-end;
-          margin-bottom: 20px;
+          margin-bottom: 1.25rem;
         }
 
         .form-group label {
           display: block;
-          color: #333;
-          font-weight: 400;
-          margin-bottom: 6px;
-          font-size: 13px;
+          color: #3B3B3B;
+          font-weight: 500;
+          margin-bottom: 0.375rem;
+          font-size: 0.8125rem;
         }
 
         .form-input,
         .form-textarea {
           width: 100%;
-          padding: 6px 8px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
-          font-size: 13px;
+          padding: 0.5rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
+          font-size: 0.8125rem;
           font-family: inherit;
-          transition: border-color 0.2s;
-          background-color: #ffffff;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          background-color: #FFFFFF;
+          color: #212121;
+        }
+
+        .form-input:hover,
+        .form-textarea:hover {
+          border-color: #B5B5B5;
         }
 
         .form-input:focus,
         .form-textarea:focus {
           outline: none;
-          border-color: #1e90ff;
+          border-color: #6E3FFF;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.6);
         }
 
         .form-textarea {
@@ -400,19 +411,19 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
         }
 
         .ai-fill-button {
-          background: linear-gradient(135deg, #7C3AED 0%, #6366F1 100%);
+          background: #6E3FFF;
           color: white;
           border: none;
-          padding: 8px 20px;
-          border-radius: 20px;
+          padding: 0.5rem 1.25rem;
+          border-radius: 9999px;
           cursor: pointer;
-          font-size: 13px;
+          font-size: 0.8125rem;
           font-weight: 500;
           transition: all 0.2s;
-          box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 0.375rem;
         }
 
         .ai-icon {
@@ -420,30 +431,35 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
         }
 
         .ai-fill-button:hover:not(:disabled) {
-          background: linear-gradient(135deg, #6D28D9 0%, #4F46E5 100%);
-          box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+          background: #5319E0;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
           transform: translateY(-1px);
         }
 
+        .ai-fill-button:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
         .ai-fill-button:disabled {
-          background: #e0e0e0;
-          color: #999;
+          background: #E9E9E9;
+          color: #B5B5B5;
           cursor: not-allowed;
           box-shadow: none;
           transform: none;
         }
 
         .ai-error-message {
-          background-color: #fef2f2;
-          border: 1px solid #fecaca;
-          border-radius: 4px;
-          padding: 12px;
-          margin-bottom: 16px;
+          background-color: #FFF5F4;
+          border: 1px solid #FFE4E2;
+          border-radius: 0.375rem;
+          padding: 0.75rem;
+          margin-bottom: 1rem;
           display: flex;
           align-items: flex-start;
-          gap: 8px;
-          font-size: 13px;
-          color: #dc2626;
+          gap: 0.5rem;
+          font-size: 0.8125rem;
+          color: #D92739;
           line-height: 1.5;
         }
 
@@ -453,42 +469,42 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
         }
 
         .image-info {
-          margin-top: 20px;
-          padding-top: 16px;
-          border-top: 1px solid #e5e5e5;
+          margin-top: 1.25rem;
+          padding-top: 1rem;
+          border-top: 1px solid #E9E9E9;
         }
 
         .info-item {
-          margin-bottom: 12px;
-          font-size: 13px;
+          margin-bottom: 0.75rem;
+          font-size: 0.8125rem;
         }
 
         .info-label {
           display: block;
-          color: #666;
-          font-weight: 400;
-          margin-bottom: 4px;
+          color: #717171;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
         }
 
         .info-value {
-          color: #333;
+          color: #3B3B3B;
           word-break: break-all;
-          font-size: 12px;
+          font-size: 0.75rem;
         }
 
         .info-value-link {
           display: inline-flex;
           align-items: center;
-          gap: 4px;
-          color: #1e90ff;
+          gap: 0.25rem;
+          color: #6E3FFF;
           text-decoration: none;
           word-break: break-all;
-          font-size: 12px;
+          font-size: 0.75rem;
           transition: color 0.2s;
         }
 
         .info-value-link:hover {
-          color: #0066cc;
+          color: #5319E0;
           text-decoration: underline;
         }
 
@@ -504,9 +520,9 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
 
         .path-hint {
           display: block;
-          font-size: 11px;
-          color: #999;
-          margin-top: 4px;
+          font-size: 0.6875rem;
+          color: #8E8E8E;
+          margin-top: 0.25rem;
           font-style: italic;
         }
       `}</style>

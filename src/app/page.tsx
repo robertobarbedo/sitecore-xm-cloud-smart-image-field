@@ -632,53 +632,57 @@ function CustomFieldExtension() {
         <style jsx>{`
           .app-container {
             min-height: 100vh;
-            background-color: #ffffff;
+            background-color: #FFFFFF;
             display: flex;
             flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
           }
 
           .toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #fafafa;
-            border-bottom: 1px solid #e5e5e5;
-            padding: 8px 16px;
+            background-color: #F7F7F7;
+            border-bottom: 1px solid #E9E9E9;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
           }
 
           .toolbar-left {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 0.25rem;
           }
 
           .tab-button {
             background: none;
             border: none;
-            color: #666;
-            font-size: 13px;
+            color: #717171;
+            font-size: 0.8125rem;
             font-weight: 400;
-            padding: 6px 10px;
+            padding: 0.375rem 0.625rem;
             cursor: pointer;
-            transition: color 0.2s;
-            border-radius: 2px;
+            transition: color 0.2s, background-color 0.2s;
+            border-radius: 0.25rem;
           }
 
           .tab-button:hover {
-            color: #333;
+            color: #3B3B3B;
+            background-color: rgba(0, 0, 0, 0.04);
           }
 
           .tab-button.active {
-            color: #1e90ff;
+            color: #6E3FFF;
             font-weight: 500;
+            background-color: #F7F6FF;
           }
 
           .tab-button.completed {
-            color: #10b981;
+            color: #0EA184;
           }
 
           .tab-button.disabled {
-            color: #d0d0d0;
+            color: #D8D8D8;
             cursor: not-allowed;
           }
 
@@ -688,16 +692,16 @@ function CustomFieldExtension() {
           }
 
           .separator {
-            color: #d0d0d0;
-            font-size: 13px;
+            color: #D8D8D8;
+            font-size: 0.8125rem;
             user-select: none;
-            margin: 0 4px;
+            margin: 0 0.25rem;
           }
 
           .toolbar-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.75rem;
           }
 
           .processing-indicator {
@@ -707,10 +711,10 @@ function CustomFieldExtension() {
           }
 
           .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #e0e0e0;
-            border-top-color: #7C3AED;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #E9E9E9;
+            border-top-color: #6E3FFF;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
@@ -722,12 +726,12 @@ function CustomFieldExtension() {
           }
 
           .thumbnail-preview {
-            width: 32px;
-            height: 32px;
-            border-radius: 2px;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.25rem;
             overflow: hidden;
-            border: 1px solid #e0e0e0;
-            background-color: #fafafa;
+            border: 1px solid #E9E9E9;
+            background-color: #F7F7F7;
           }
 
           .thumbnail-preview img {
@@ -737,27 +741,32 @@ function CustomFieldExtension() {
           }
 
           .save-button {
-            background: linear-gradient(135deg, #7C3AED 0%, #6366F1 100%);
+            background: #6E3FFF;
             color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 0.8125rem;
             font-weight: 500;
             transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
           }
 
           .save-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #6D28D9 0%, #4F46E5 100%);
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+            background: #5319E0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transform: translateY(-1px);
           }
 
+          .save-button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          }
+
           .save-button:disabled {
-            background: #e0e0e0;
-            color: #999;
+            background: #E9E9E9;
+            color: #B5B5B5;
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
@@ -766,7 +775,7 @@ function CustomFieldExtension() {
           .content-area {
             flex: 1;
             overflow-y: auto;
-            background-color: #ffffff;
+            background-color: #FFFFFF;
           }
           
           .loading-container {
@@ -774,8 +783,8 @@ function CustomFieldExtension() {
             justify-content: center;
             align-items: center;
             min-height: 200px;
-            color: #666;
-            font-size: 14px;
+            color: #717171;
+            font-size: 0.875rem;
           }
           
           .error-container {
@@ -783,9 +792,9 @@ function CustomFieldExtension() {
             justify-content: center;
             align-items: center;
             min-height: 200px;
-            color: #d32f2f;
-            font-size: 14px;
-            padding: 20px;
+            color: #D92739;
+            font-size: 0.875rem;
+            padding: 1.25rem;
             text-align: center;
           }
         `}</style>

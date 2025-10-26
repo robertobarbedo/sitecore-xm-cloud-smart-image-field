@@ -163,18 +163,19 @@ export function RecommendedInfoPanel({ uploadedImage, compact = false }: Recomme
 
       <style jsx>{`
         .recommendations-banner {
-          border-radius: 4px;
-          padding: 10px 16px;
-          margin-bottom: 16px;
+          border-radius: 0.25rem;
+          padding: 0.625rem 1rem;
+          margin-bottom: 1rem;
           display: flex;
           align-items: center;
           justify-content: flex-end;
-          gap: 8px;
+          gap: 0.5rem;
           flex-wrap: wrap;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
         .recommendations-banner.compact {
-          padding: 0px 0;
+          padding: 0;
           margin-bottom: 0;
           border-radius: 0;
           justify-content: flex-start;
@@ -190,12 +191,12 @@ export function RecommendedInfoPanel({ uploadedImage, compact = false }: Recomme
         .info-icon {
           width: 18px;
           height: 18px;
-          color: #1565c0;
+          color: #6E3FFF;
           transition: color 0.2s;
         }
 
         .info-icon-wrapper:hover .info-icon {
-          color: #0d47a1;
+          color: #5319E0;
         }
 
         .tooltip {
@@ -203,14 +204,14 @@ export function RecommendedInfoPanel({ uploadedImage, compact = false }: Recomme
           top: 100%;
           left: 50%;
           transform: translateX(-50%);
-          margin-top: 8px;
-          background-color: #333;
+          margin-top: 0.5rem;
+          background-color: #3B3B3B;
           color: white;
-          padding: 8px 12px;
-          border-radius: 4px;
-          font-size: 12px;
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.25rem;
+          font-size: 0.75rem;
           white-space: nowrap;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
           z-index: 1000;
         }
 
@@ -221,46 +222,46 @@ export function RecommendedInfoPanel({ uploadedImage, compact = false }: Recomme
           left: 50%;
           transform: translateX(-50%);
           border: 6px solid transparent;
-          border-bottom-color: #333;
+          border-bottom-color: #3B3B3B;
         }
 
         .recommendations-list {
-          font-size: 12px;
-          color: #1976d2;
+          font-size: 0.75rem;
+          color: #6E3FFF;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 0.5rem;
           flex-wrap: wrap;
         }
 
         .recommendations-list strong {
-          color: #0d47a1;
-          margin-right: 4px;
+          color: #5319E0;
+          margin-right: 0.25rem;
         }
 
         .separator {
-          color: #90caf9;
-          margin: 0 4px;
+          color: #D9D4FF;
+          margin: 0 0.25rem;
         }
 
         .validation-results {
-          background-color: #fafafa;
-          border: 1px solid #e0e0e0;
-          border-radius: 4px;
-          padding: 12px 16px;
-          margin-bottom: 16px;
+          background-color: #F7F7F7;
+          border: 1px solid #E9E9E9;
+          border-radius: 0.25rem;
+          padding: 0.75rem 1rem;
+          margin-bottom: 1rem;
         }
 
         .validation-match {
-          font-size: 12px;
-          color: #2e7d32;
-          margin-bottom: 4px;
+          font-size: 0.75rem;
+          color: #0EA184;
+          margin-bottom: 0.25rem;
         }
 
         .validation-warning {
-          font-size: 12px;
-          color: #f57c00;
-          margin-bottom: 4px;
+          font-size: 0.75rem;
+          color: #FF7D00;
+          margin-bottom: 0.25rem;
         }
       `}</style>
     </>

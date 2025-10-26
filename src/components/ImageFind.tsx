@@ -446,113 +446,119 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
 
       <style jsx>{`
         .image-find-container {
-          padding: 16px;
+          padding: 1rem;
           height: 100%;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
         }
 
         .main-layout {
           display: flex;
-          gap: 16px;
+          gap: 1rem;
           height: 100%;
         }
 
         .filters-sidebar {
           width: 220px;
           flex-shrink: 0;
-          background-color: #f9f9f9;
-          padding: 16px;
-          border-radius: 4px;
-          border: 1px solid #e5e5e5;
+          background-color: #F7F7F7;
+          padding: 1rem;
+          border-radius: 0.375rem;
+          border: 1px solid #E9E9E9;
         }
 
         .filters-title {
-          font-size: 14px;
+          font-size: 0.875rem;
           font-weight: 600;
-          color: #333;
-          margin: 0 0 16px 0;
+          color: #3B3B3B;
+          margin: 0 0 1rem 0;
         }
 
         .filter-section {
-          margin-bottom: 20px;
+          margin-bottom: 1.25rem;
         }
 
         .filter-label {
           display: block;
-          font-size: 12px;
+          font-size: 0.75rem;
           font-weight: 500;
-          color: #666;
-          margin-bottom: 8px;
+          color: #717171;
+          margin-bottom: 0.5rem;
         }
 
         .dimension-inputs {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
         }
 
         .dimension-input {
           flex: 1;
-          padding: 6px 8px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
-          font-size: 13px;
+          padding: 0.375rem 0.5rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
+          font-size: 0.8125rem;
           font-family: inherit;
+          transition: all 0.2s;
         }
 
         .dimension-input:focus {
           outline: none;
-          border-color: #1e90ff;
+          border-color: #6E3FFF;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.1);
         }
 
         .dimension-separator {
-          color: #999;
-          font-size: 14px;
+          color: #B5B5B5;
+          font-size: 0.875rem;
         }
 
         .checkbox-label {
           display: flex;
           align-items: center;
-          gap: 6px;
-          font-size: 12px;
-          color: #666;
+          gap: 0.375rem;
+          font-size: 0.75rem;
+          color: #717171;
           cursor: pointer;
         }
 
         .checkbox-label input[type="checkbox"] {
           cursor: pointer;
+          accent-color: #6E3FFF;
         }
 
         .filter-select {
           width: 100%;
-          padding: 6px 8px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
-          font-size: 13px;
+          padding: 0.375rem 0.5rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
+          font-size: 0.8125rem;
           background-color: white;
+          transition: all 0.2s;
         }
 
         .filter-select:focus {
           outline: none;
-          border-color: #1e90ff;
+          border-color: #6E3FFF;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.1);
         }
 
         .clear-filters-button {
           width: 100%;
-          padding: 8px;
+          padding: 0.5rem;
           background-color: white;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
-          font-size: 12px;
-          color: #666;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
+          font-size: 0.75rem;
+          color: #717171;
           cursor: pointer;
           transition: all 0.2s;
         }
 
         .clear-filters-button:hover {
-          background-color: #f5f5f5;
-          border-color: #999;
-          color: #333;
+          background-color: #F7F7F7;
+          border-color: #B5B5B5;
+          color: #3B3B3B;
         }
 
         .content-area {
@@ -562,8 +568,8 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
 
         .controls {
           display: flex;
-          gap: 12px;
-          margin-bottom: 16px;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
           flex-wrap: wrap;
         }
 
@@ -574,75 +580,85 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
 
         .search-input {
           width: 100%;
-          padding: 8px 12px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
-          font-size: 13px;
+          padding: 0.5rem 0.75rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
+          font-size: 0.8125rem;
           font-family: inherit;
+          transition: all 0.2s;
         }
 
         .search-input:focus {
           outline: none;
-          border-color: #1e90ff;
+          border-color: #6E3FFF;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.1);
         }
 
         .sort-controls {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 0.5rem;
         }
 
         .sort-controls label {
-          font-size: 13px;
-          color: #666;
+          font-size: 0.8125rem;
+          color: #717171;
         }
 
         .sort-select {
-          padding: 6px 8px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
-          font-size: 13px;
+          padding: 0.375rem 0.5rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
+          font-size: 0.8125rem;
           background-color: white;
+          transition: all 0.2s;
+        }
+
+        .sort-select:focus {
+          outline: none;
+          border-color: #6E3FFF;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.1);
         }
 
         .sort-order-button {
-          padding: 6px 12px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
+          padding: 0.375rem 0.75rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
           background-color: white;
           cursor: pointer;
-          font-size: 16px;
-          transition: background-color 0.2s;
+          font-size: 1rem;
+          transition: all 0.2s;
         }
 
         .sort-order-button:hover {
-          background-color: #f5f5f5;
+          background-color: #F7F7F7;
+          border-color: #6E3FFF;
         }
 
         .recommendations-container {
-          margin-bottom: 12px;
+          margin-bottom: 0.75rem;
         }
 
         .error-message {
-          padding: 12px;
-          background-color: #fee;
-          border: 1px solid #fcc;
-          border-radius: 2px;
-          color: #c33;
-          font-size: 13px;
-          margin-bottom: 12px;
+          padding: 0.75rem;
+          background-color: #FFF5F4;
+          border: 1px solid #FFE4E2;
+          border-radius: 0.375rem;
+          color: #D92739;
+          font-size: 0.8125rem;
+          margin-bottom: 0.75rem;
         }
 
         .image-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-          gap: 12px;
-          margin-bottom: 16px;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
         }
 
         .image-card {
-          border: 1px solid #e5e5e5;
-          border-radius: 2px;
+          border: 1px solid #E9E9E9;
+          border-radius: 0.375rem;
           overflow: hidden;
           cursor: pointer;
           transition: all 0.2s;
@@ -650,19 +666,19 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
         }
 
         .image-card:hover {
-          border-color: #1e90ff;
-          box-shadow: 0 2px 8px rgba(30, 144, 255, 0.2);
+          border-color: #6E3FFF;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .image-card.selected {
-          border-color: #1e90ff;
-          box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.3);
+          border-color: #6E3FFF;
+          box-shadow: 0 0 0 3px rgba(110, 63, 255, 0.3);
         }
 
         .image-thumbnail {
           width: 100%;
           height: 150px;
-          background-color: #fafafa;
+          background-color: #F7F7F7;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -676,50 +692,50 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
         }
 
         .image-info {
-          padding: 8px;
+          padding: 0.5rem;
         }
 
         .image-name {
-          font-size: 12px;
+          font-size: 0.75rem;
           font-weight: 500;
-          color: #333;
+          color: #3B3B3B;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          margin-bottom: 4px;
+          margin-bottom: 0.25rem;
         }
 
         .image-alt {
-          font-size: 11px;
-          color: #666;
+          font-size: 0.6875rem;
+          color: #717171;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          margin-bottom: 4px;
+          margin-bottom: 0.25rem;
         }
 
         .image-specs {
           display: flex;
-          gap: 8px;
-          margin-bottom: 4px;
+          gap: 0.5rem;
+          margin-bottom: 0.25rem;
           flex-wrap: wrap;
         }
 
         .spec-item {
           display: flex;
           align-items: center;
-          gap: 3px;
-          font-size: 10px;
-          color: #666;
-          background-color: #f5f5f5;
-          padding: 2px 0px;
-          border-radius: 2px;
+          gap: 0.1875rem;
+          font-size: 0.625rem;
+          color: #717171;
+          background-color: #F7F7F7;
+          padding: 0.125rem 0;
+          border-radius: 0.125rem;
         }
 
         .spec-icon {
           width: 12px;
           height: 12px;
-          color: #999;
+          color: #B5B5B5;
           flex-shrink: 0;
         }
 
@@ -728,55 +744,55 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
         }
 
         .image-date {
-          font-size: 11px;
-          color: #999;
+          font-size: 0.6875rem;
+          color: #B5B5B5;
         }
 
         .empty-state {
           text-align: center;
-          padding: 60px 20px;
+          padding: 3.75rem 1.25rem;
         }
 
         .empty-icon {
-          font-size: 48px;
-          margin-bottom: 16px;
+          font-size: 3rem;
+          margin-bottom: 1rem;
           opacity: 0.5;
         }
 
         .empty-text {
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 8px;
+          font-size: 0.875rem;
+          color: #717171;
+          margin-bottom: 0.5rem;
         }
 
         .empty-subtext {
-          font-size: 12px;
-          color: #999;
+          font-size: 0.75rem;
+          color: #B5B5B5;
         }
 
         .pagination {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 16px;
-          padding: 16px 0;
-          border-top: 1px solid #e5e5e5;
+          gap: 1rem;
+          padding: 1rem 0;
+          border-top: 1px solid #E9E9E9;
         }
 
         .pagination-button {
-          padding: 6px 12px;
-          border: 1px solid #d0d0d0;
-          border-radius: 2px;
+          padding: 0.375rem 0.75rem;
+          border: 1px solid #D8D8D8;
+          border-radius: 0.375rem;
           background-color: white;
           cursor: pointer;
-          font-size: 13px;
+          font-size: 0.8125rem;
           transition: all 0.2s;
         }
 
         .pagination-button:hover:not(:disabled) {
-          background-color: #1e90ff;
+          background-color: #6E3FFF;
           color: white;
-          border-color: #1e90ff;
+          border-color: #6E3FFF;
         }
 
         .pagination-button:disabled {
@@ -785,8 +801,8 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
         }
 
         .pagination-info {
-          font-size: 13px;
-          color: #666;
+          font-size: 0.8125rem;
+          color: #717171;
         }
       `}</style>
     </div>

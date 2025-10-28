@@ -26,9 +26,11 @@ interface ImageMetadataProps {
   onMetadataChange: (altText: string, description: string, focusX?: number, focusY?: number) => void;
   autoCaption?: boolean;
   onProcessingChange?: (isProcessing: boolean) => void;
+  clientId?: string;
+  clientSecret?: string;
 }
 
-export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCaption, onProcessingChange }: ImageMetadataProps) {
+export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCaption, onProcessingChange, clientId = '', clientSecret = '' }: ImageMetadataProps) {
   const [altText, setAltText] = useState('');
   const [description, setDescription] = useState('');
   const [focusX, setFocusX] = useState(0.5);
@@ -99,10 +101,9 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
     try {
       console.log('Fetching image for AI analysis:', selectedImage.previewUrl);
       
-      // Get URL params for authentication
-      const params = getUrlParams();
-      if (!params) {
-        throw new Error('Missing URL parameters for authentication');
+      // Check if credentials are available
+      if (!clientId || !clientSecret) {
+        throw new Error('Missing client credentials for authentication');
       }
       
       // Use proxy to fetch image with OAuth2 authentication
@@ -113,8 +114,8 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
         },
         body: JSON.stringify({ 
           imageUrl: selectedImage.previewUrl,
-          organizationId: params.organizationId,
-          key: params.key,
+          clientId,
+          clientSecret,
         }),
       });
 

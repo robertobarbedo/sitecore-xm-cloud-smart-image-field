@@ -1,6 +1,7 @@
 // lib/config.ts
 
-import { createLibrariesStorage, createSettingsStorage, getStorageType } from './storage';
+import { SitecoreLibrariesStorage } from './storage/sitecore-libraries-storage';
+import { SitecoreSettingsStorage } from './storage/sitecore-settings-storage';
 import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 
 //baseFolder is the path where we will store the images, it will appended with year, month, day, hour and random suffix
@@ -15,26 +16,29 @@ export interface Config {
 
 /**
  * Gets configuration settings for the smart image field
- * - Reads baseFolder from the libraries storage (identified by organizationId + key)
- * - Reads previewHost, clientId, clientSecret from the settings storage (identified by organizationId only)
+ * - Reads baseFolder from Sitecore libraries (identified by organizationId + key)
+ * - Reads previewHost, clientId, clientSecret from Sitecore settings (identified by organizationId only)
  * @param organizationId - The organization identifier
  * @param key - The library key
- * @param client - Optional ClientSDK instance (required for Sitecore storage)
+ * @param client - ClientSDK instance (required)
  * @returns Configuration object with baseFolder path, previewHost, and credentials
  * @throws Error if library or settings not found, or if there's a database error
  */
-export async function getConfig(organizationId: string, key: string, client?: ClientSDK): Promise<Config> {
+export async function getConfig(organizationId: string, key: string, client: ClientSDK): Promise<Config> {
   if (!organizationId || !key) {
     throw new Error('organizationId and key are required');
   }
 
-  const storageType = getStorageType();
-  console.log(`⚙️ Using ${storageType} storage for configuration`);
+  if (!client) {
+    throw new Error('ClientSDK is required');
+  }
+
+  console.log(`⚙️ Using Sitecore storage for configuration`);
 
   try {
-    // Create storage instances
-    const librariesStorage = createLibrariesStorage(client);
-    const settingsStorage = createSettingsStorage(client);
+    // Create Sitecore storage instances
+    const librariesStorage = new SitecoreLibrariesStorage(client);
+    const settingsStorage = new SitecoreSettingsStorage(client);
 
     // Fetch library configuration (baseFolder)
     console.log('⏳ Fetching library with:', { organizationId, key });

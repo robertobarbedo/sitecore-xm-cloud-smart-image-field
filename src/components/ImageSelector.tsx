@@ -40,23 +40,27 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
   const [uploadedImage, setUploadedImage] = useState<UploadedImageData | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [baseFolder, setBaseFolder] = useState<string>('');
+  const [clientId, setClientId] = useState<string>('');
+  const [clientSecret, setClientSecret] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load base folder once on mount
+  // Load config once on mount
   useEffect(() => {
-    const loadBaseFolder = async () => {
+    const loadConfig = async () => {
       const params = getUrlParams();
       if (!params) return;
       
       try {
         const config = await getConfig(params.organizationId, params.key, client);
         setBaseFolder(config.baseFolder);
+        setClientId(config.clientId);
+        setClientSecret(config.clientSecret);
       } catch (error) {
-        console.error('Error loading base folder:', error);
+        console.error('Error loading config:', error);
       }
     };
     
-    loadBaseFolder();
+    loadConfig();
   }, [client]);
 
   const sanitizeFileName = (fileName: string): string => {
@@ -180,13 +184,13 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
     // Also encode the file type and name
     const encodedFileType = encodeURIComponent(file.type);
     const encodedFileName = encodeURIComponent(file.name);
-    const encodedOrgId = encodeURIComponent(params.organizationId);
-    const encodedKey = encodeURIComponent(params.key);
+    const encodedClientId = encodeURIComponent(clientId);
+    const encodedClientSecret = encodeURIComponent(clientSecret);
     
     // Convert file to ArrayBuffer for binary upload
     const fileBuffer = await file.arrayBuffer();
 
-    const response = await fetch(`/api/upload?presignedUrl=${encodedPresignedUrl}&fileType=${encodedFileType}&fileName=${encodedFileName}&organizationId=${encodedOrgId}&key=${encodedKey}`, {
+    const response = await fetch(`/api/upload?presignedUrl=${encodedPresignedUrl}&fileType=${encodedFileType}&fileName=${encodedFileName}&clientId=${encodedClientId}&clientSecret=${encodedClientSecret}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream'

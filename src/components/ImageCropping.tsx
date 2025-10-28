@@ -45,6 +45,8 @@ interface ImageCroppingProps {
   client?: any;
   autoCrop?: boolean;
   onProcessingChange?: (isProcessing: boolean) => void;
+  clientId?: string;
+  clientSecret?: string;
 }
 
 interface FocalPoint {
@@ -52,7 +54,7 @@ interface FocalPoint {
   y: number; // percentage 0-1
 }
 
-export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVersionsChange, client, autoCrop, onProcessingChange }: ImageCroppingProps) {
+export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVersionsChange, client, autoCrop, onProcessingChange, clientId = '', clientSecret = '' }: ImageCroppingProps) {
   const [cropConfigs, setCropConfigs] = useState<CropConfigs>({});
   const imageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -112,12 +114,8 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
     const loadProxiedImage = async () => {
       setIsLoadingImage(true);
       try {
-        const params = new URLSearchParams(window.location.search);
-        const organizationId = params.get('organizationId');
-        const key = params.get('key');
-
-        if (!organizationId || !key) {
-          console.error('Missing URL parameters');
+        if (!clientId || !clientSecret) {
+          console.error('Missing client credentials');
           setProxiedImageUrl(selectedImage.previewUrl || '');
           return;
         }
@@ -129,8 +127,8 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
           },
           body: JSON.stringify({
             imageUrl: selectedImage.previewUrl,
-            organizationId,
-            key
+            clientId,
+            clientSecret
           }),
         });
 
@@ -400,23 +398,19 @@ export function ImageCropping({ selectedImage, onFocalPointChange, onCroppedVers
   };
 
   const uploadToPresignedUrl = async (blob: Blob, presignedUrl: string, fileName: string): Promise<string> => {
-    const params = new URLSearchParams(window.location.search);
-    const organizationId = params.get('organizationId');
-    const key = params.get('key');
-
-    if (!organizationId || !key) {
-      throw new Error('Missing URL parameters for authentication');
+    if (!clientId || !clientSecret) {
+      throw new Error('Missing client credentials for authentication');
     }
 
     const encodedPresignedUrl = encodeURIComponent(presignedUrl);
     const encodedFileType = encodeURIComponent(blob.type);
     const encodedFileName = encodeURIComponent(fileName);
-    const encodedOrgId = encodeURIComponent(organizationId);
-    const encodedKey = encodeURIComponent(key);
+    const encodedClientId = encodeURIComponent(clientId);
+    const encodedClientSecret = encodeURIComponent(clientSecret);
     
     const fileBuffer = await blob.arrayBuffer();
 
-    const response = await fetch(`/api/upload?presignedUrl=${encodedPresignedUrl}&fileType=${encodedFileType}&fileName=${encodedFileName}&organizationId=${encodedOrgId}&key=${encodedKey}`, {
+    const response = await fetch(`/api/upload?presignedUrl=${encodedPresignedUrl}&fileType=${encodedFileType}&fileName=${encodedFileName}&clientId=${encodedClientId}&clientSecret=${encodedClientSecret}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/octet-stream'

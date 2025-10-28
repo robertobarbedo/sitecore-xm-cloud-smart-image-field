@@ -1,7 +1,6 @@
 // app/api/upload/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getConfig } from '@/src/lib/config';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -17,8 +16,8 @@ export async function POST(request: NextRequest) {
     const presignedUrl = searchParams.get('presignedUrl');
     const fileType = searchParams.get('fileType') || 'application/octet-stream';
     const fileName = searchParams.get('fileName') || 'uploaded-file';
-    const organizationId = searchParams.get('organizationId');
-    const key = searchParams.get('key');
+    const clientId = searchParams.get('clientId');
+    const clientSecret = searchParams.get('clientSecret');
     
     // Get file binary from request body
     const fileBuffer = await request.arrayBuffer();
@@ -31,9 +30,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!organizationId || !key) {
+    if (!clientId || !clientSecret) {
       return NextResponse.json(
-        { error: 'organizationId and key are required for authentication' },
+        { error: 'clientId and clientSecret are required for authentication' },
         { status: 400 }
       );
     }
@@ -52,11 +51,6 @@ export async function POST(request: NextRequest) {
       fileName: fileName
     });
 
-    // Get config with client credentials
-    const config = await getConfig(organizationId, key);
-    console.warn('Config loaded for upload');
-    console.warn(config);
-
     // Step 1: Authenticate with Sitecore OAuth2
     console.log('Step 1: Authenticating with Sitecore OAuth2...');
     
@@ -65,8 +59,8 @@ export async function POST(request: NextRequest) {
     // Prepare OAuth2 request body with client credentials
     const authBody = new URLSearchParams({
       grant_type: 'client_credentials',
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
+      client_id: clientId,
+      client_secret: clientSecret,
       audience: 'https://api.sitecorecloud.io'
     });
 

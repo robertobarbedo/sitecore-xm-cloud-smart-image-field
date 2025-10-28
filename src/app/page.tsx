@@ -50,6 +50,8 @@ function CustomFieldExtension() {
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
   const [initialImage, setInitialImage] = useState<SelectedImage | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [clientId, setClientId] = useState<string>('');
+  const [clientSecret, setClientSecret] = useState<string>('');
   
   // New Image Flow wizard state
   const [isNewImageFlow, setIsNewImageFlow] = useState(false);
@@ -111,6 +113,10 @@ function CustomFieldExtension() {
               + (parsedValue.imageExtension ? `.${parsedValue.imageExtension}` : '');
             
             parsedValue.previewUrl = previewUrl;
+            
+            // Store credentials for API calls
+            setClientId(config.clientId);
+            setClientSecret(config.clientSecret);
             
             // Extract name and extension if not already present
             if (!parsedValue.imageName || !parsedValue.imageExtension) {
@@ -202,6 +208,10 @@ function CustomFieldExtension() {
         // Get the base folder from config
         const config = await getConfig(params.organizationId, params.key, client);
         console.log('Loaded config:', config);
+        
+        // Store credentials for API calls
+        setClientId(config.clientId);
+        setClientSecret(config.clientSecret);
         
         const baseFolder = config.baseFolder;
         
@@ -607,6 +617,8 @@ function CustomFieldExtension() {
               onMetadataChange={handleMetadataChange}
               autoCaption={isNewImageFlow && autoCaptionEnabled}
               onProcessingChange={setIsProcessing}
+              clientId={clientId}
+              clientSecret={clientSecret}
             />
           )}
           {activeView === 'cropping' && (
@@ -617,6 +629,8 @@ function CustomFieldExtension() {
               onCroppedVersionsChange={handleCroppedVersionsChange}
               autoCrop={isNewImageFlow && autoCropEnabled}
               onProcessingChange={setIsProcessing}
+              clientId={clientId}
+              clientSecret={clientSecret}
             />
           )}
           {activeView === 'appcontext' && <AppContext />}

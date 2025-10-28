@@ -1,6 +1,5 @@
 // API route to proxy image fetching to avoid CORS issues
 import { NextRequest, NextResponse } from 'next/server';
-import { getConfig } from '@/src/lib/config';
 
 interface OAuth2TokenResponse {
   access_token: string;
@@ -10,7 +9,7 @@ interface OAuth2TokenResponse {
 
 export async function POST(request: NextRequest) {
   try {
-    const { imageUrl, organizationId, key } = await request.json();
+    const { imageUrl, clientId, clientSecret } = await request.json();
 
     if (!imageUrl) {
       return NextResponse.json(
@@ -19,17 +18,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!organizationId || !key) {
+    if (!clientId || !clientSecret) {
       return NextResponse.json(
-        { error: 'organizationId and key are required for authentication' },
+        { error: 'clientId and clientSecret are required for authentication' },
         { status: 400 }
       );
     }
 
     console.log('Proxying image fetch for:', imageUrl);
-
-    // Get config with client credentials
-    const config = await getConfig(organizationId, key);
 
     // Step 1: Authenticate with Sitecore OAuth2
     console.log('Step 1: Authenticating with Sitecore OAuth2...');
@@ -37,8 +33,8 @@ export async function POST(request: NextRequest) {
     const tokenUrl = 'https://auth.sitecorecloud.io/oauth/token';
     const authBody = new URLSearchParams({
       grant_type: 'client_credentials',
-      client_id: config.clientId,
-      client_secret: config.clientSecret,
+      client_id: clientId,
+      client_secret: clientSecret,
       audience: 'https://api.sitecorecloud.io'
     });
 

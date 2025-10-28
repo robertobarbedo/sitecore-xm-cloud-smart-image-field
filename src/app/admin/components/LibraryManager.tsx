@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 import { Library } from '../types/library';
-import { createLibrariesStorage } from '@/src/lib/storage';
-import { createSettingsStorage } from '@/src/lib/storage';
+import { SitecoreLibrariesStorage } from '@/src/lib/storage/sitecore-libraries-storage';
+import { SitecoreSettingsStorage } from '@/src/lib/storage/sitecore-settings-storage';
 import { generateLibraryKey } from '../lib/supabase-admin';
 import { getAdminUrlParams } from '../lib/url-parser';
 import { LibraryList } from './LibraryList';
@@ -69,9 +69,9 @@ export function LibraryManager({ client }: LibraryManagerProps) {
       setIsLoading(true);
       setError('');
 
-      // Create storage instances
-      const settingsStorage = createSettingsStorage(client);
-      const librariesStorage = createLibrariesStorage(client);
+      // Create Sitecore storage instances
+      const settingsStorage = new SitecoreSettingsStorage(client);
+      const librariesStorage = new SitecoreLibrariesStorage(client);
 
       // FIRST: Check if settings exist (required before libraries)
       const settingsExist = await settingsStorage.hasSettings(organizationId);
@@ -145,7 +145,7 @@ export function LibraryManager({ client }: LibraryManagerProps) {
       setIsSaving(true);
       setError('');
 
-      const librariesStorage = createLibrariesStorage(client);
+      const librariesStorage = new SitecoreLibrariesStorage(client);
 
       if (viewMode === 'create') {
         const created = await librariesStorage.saveLibrary(organizationId, library);
@@ -201,7 +201,7 @@ export function LibraryManager({ client }: LibraryManagerProps) {
       console.log('⏳ Archiving library...');
       setError('');
       
-      const librariesStorage = createLibrariesStorage(client);
+      const librariesStorage = new SitecoreLibrariesStorage(client);
       await librariesStorage.archiveLibrary(organizationId, library);
       
       console.log('✅ Library archived, updating UI...');
@@ -242,7 +242,7 @@ export function LibraryManager({ client }: LibraryManagerProps) {
     // After settings are saved in first-time setup, check for libraries
     console.log('⏳ Settings saved, checking for libraries...');
     
-    const librariesStorage = createLibrariesStorage(client);
+    const librariesStorage = new SitecoreLibrariesStorage(client);
     const hasLibraries = await librariesStorage.hasAnyLibraries(organizationId);
     
     if (!hasLibraries) {

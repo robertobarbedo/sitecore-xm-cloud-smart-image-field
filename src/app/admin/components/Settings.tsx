@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 import { Settings } from '../types/library';
-import { createSettingsStorage } from '@/src/lib/storage';
+import { SitecoreSettingsStorage } from '@/src/lib/storage/sitecore-settings-storage';
 import { validatePreviewHost, normalizePreviewHost } from '../lib/url-parser';
 
 interface SettingsProps {
@@ -33,7 +33,7 @@ export function SettingsComponent({ client, organizationId, onBack, onSettingsSa
     try {
       setIsLoading(true);
       
-      const settingsStorage = createSettingsStorage(client);
+      const settingsStorage = new SitecoreSettingsStorage(client);
       const settings = await settingsStorage.getSettings(organizationId);
       
       if (settings) {
@@ -85,7 +85,7 @@ export function SettingsComponent({ client, organizationId, onBack, onSettingsSa
         preview_host: normalizePreviewHost(formData.preview_host),
       };
 
-      const settingsStorage = createSettingsStorage(client);
+      const settingsStorage = new SitecoreSettingsStorage(client);
       await settingsStorage.saveSettings(organizationId, normalizedSettings);
       
       setSuccessMessage('Settings saved successfully!');

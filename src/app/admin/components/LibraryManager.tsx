@@ -3,15 +3,9 @@
 import { useState, useEffect } from 'react';
 import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 import { Library } from '../types/library';
-import {
-  listLibraries,
-  createLibrary,
-  updateLibrary,
-  archiveLibrary,
-  generateLibraryKey,
-  hasAnyLibraries,
-} from '../lib/supabase-admin';
-import { hasSettings } from '../lib/supabase-settings';
+import { createLibrariesStorage } from '@/src/lib/storage';
+import { createSettingsStorage } from '@/src/lib/storage';
+import { generateLibraryKey } from '../lib/supabase-admin';
 import { getAdminUrlParams } from '../lib/url-parser';
 import { LibraryList } from './LibraryList';
 import { LibraryForm } from './LibraryForm';
@@ -40,7 +34,6 @@ export function LibraryManager({ client }: LibraryManagerProps) {
   const [selectedLibrary, setSelectedLibrary] = useState<Library | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [organizationId, setOrganizationId] = useState<string>('');
-  const [marketplaceAppTenantId, setMarketplaceAppTenantId] = useState<string>('');
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     title: '',
@@ -48,7 +41,7 @@ export function LibraryManager({ client }: LibraryManagerProps) {
     onConfirm: () => {},
   });
 
-  // Get organization ID and marketplace app tenant ID from URL on mount
+  // Get organization ID from URL on mount
   useEffect(() => {
     const params = getAdminUrlParams();
     if (params.organizationId) {
@@ -56,24 +49,18 @@ export function LibraryManager({ client }: LibraryManagerProps) {
     } else {
       setError('Organization ID not found in URL parameters');
     }
-    
-    if (params.marketplaceAppTenantId) {
-      setMarketplaceAppTenantId(params.marketplaceAppTenantId);
-    } else {
-      setError('Marketplace App Tenant ID not found in URL parameters');
-    }
   }, []);
 
-  // Load libraries when both IDs are available
+  // Load libraries when organization ID is available
   useEffect(() => {
-    if (organizationId && marketplaceAppTenantId) {
+    if (organizationId) {
       loadLibraries();
     }
-  }, [organizationId, marketplaceAppTenantId]);
+  }, [organizationId]);
 
   const loadLibraries = async () => {
-    if (!organizationId || !marketplaceAppTenantId) {
-      setError('Organization ID and Marketplace App Tenant ID are required');
+    if (!organizationId) {
+      setError('Organization ID is required');
       setIsLoading(false);
       return;
     }
@@ -82,8 +69,12 @@ export function LibraryManager({ client }: LibraryManagerProps) {
       setIsLoading(true);
       setError('');
 
+      // Create storage instances
+      const settingsStorage = createSettingsStorage(client);
+      const librariesStorage = createLibrariesStorage(client);
+
       // FIRST: Check if settings exist (required before libraries)
-      const settingsExist = await hasSettings(organizationId, marketplaceAppTenantId);
+      const settingsExist = await settingsStorage.hasSettings(organizationId);
       
       if (!settingsExist) {
         // No settings - must configure settings first
@@ -94,8 +85,8 @@ export function LibraryManager({ client }: LibraryManagerProps) {
         return;
       }
 
-      // SECOND: Check if there are ANY libraries already for this organization and tenant
-      const hasLibraries = await hasAnyLibraries(organizationId, marketplaceAppTenantId);
+      // SECOND: Check if there are ANY libraries already for this organization
+      const hasLibraries = await librariesStorage.hasAnyLibraries(organizationId);
 
       // If NO libraries exist (first time user), show editor with pre-populated fields
       if (!hasLibraries) {
@@ -112,7 +103,7 @@ export function LibraryManager({ client }: LibraryManagerProps) {
       } else {
         // Libraries exist, load them
         console.log('📚 Libraries exist, loading...');
-        const loadedLibraries = await listLibraries(organizationId, marketplaceAppTenantId);
+        const loadedLibraries = await librariesStorage.getLibraries(organizationId);
         setLibraries(loadedLibraries);
         setViewMode('list');
       }
@@ -145,8 +136,8 @@ export function LibraryManager({ client }: LibraryManagerProps) {
   };
 
   const handleSave = async (library: Library) => {
-    if (!organizationId || !marketplaceAppTenantId) {
-      setError('Organization ID and Marketplace App Tenant ID are required');
+    if (!organizationId) {
+      setError('Organization ID is required');
       return;
     }
 
@@ -154,12 +145,14 @@ export function LibraryManager({ client }: LibraryManagerProps) {
       setIsSaving(true);
       setError('');
 
+      const librariesStorage = createLibrariesStorage(client);
+
       if (viewMode === 'create') {
-        const created = await createLibrary(organizationId, marketplaceAppTenantId, library);
+        const created = await librariesStorage.saveLibrary(organizationId, library);
         setLibraries((prev) => [...prev, created]);
         console.log('✅ Library created successfully:', created.name);
       } else if (viewMode === 'edit') {
-        const updated = await updateLibrary(organizationId, marketplaceAppTenantId, library);
+        const updated = await librariesStorage.saveLibrary(organizationId, library);
         setLibraries((prev) =>
           prev.map((lib) => (lib.key === library.key ? updated : lib))
         );
@@ -180,9 +173,9 @@ export function LibraryManager({ client }: LibraryManagerProps) {
   const handleArchive = (library: Library) => {
     console.log('📦 Archive button clicked for library:', library.name, library.key);
     
-    if (!organizationId || !marketplaceAppTenantId) {
-      console.error('❌ No organization ID or marketplace app tenant ID');
-      setError('Organization ID and Marketplace App Tenant ID are required');
+    if (!organizationId) {
+      console.error('❌ No organization ID');
+      setError('Organization ID is required');
       return;
     }
 
@@ -205,9 +198,12 @@ export function LibraryManager({ client }: LibraryManagerProps) {
     setConfirmDialog({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
     try {
-      console.log('⏳ Archiving library in Supabase...');
+      console.log('⏳ Archiving library...');
       setError('');
-      await archiveLibrary(organizationId, marketplaceAppTenantId, library);
+      
+      const librariesStorage = createLibrariesStorage(client);
+      await librariesStorage.archiveLibrary(organizationId, library);
+      
       console.log('✅ Library archived, updating UI...');
       setLibraries((prev) => prev.filter((lib) => lib.key !== library.key));
       console.log('✅ UI updated successfully');
@@ -245,7 +241,9 @@ export function LibraryManager({ client }: LibraryManagerProps) {
   const handleSettingsSaved = async () => {
     // After settings are saved in first-time setup, check for libraries
     console.log('⏳ Settings saved, checking for libraries...');
-    const hasLibraries = await hasAnyLibraries(organizationId, marketplaceAppTenantId);
+    
+    const librariesStorage = createLibrariesStorage(client);
+    const hasLibraries = await librariesStorage.hasAnyLibraries(organizationId);
     
     if (!hasLibraries) {
       // No libraries - show library form
@@ -304,8 +302,8 @@ export function LibraryManager({ client }: LibraryManagerProps) {
 
       {viewMode === 'settings' && (
         <SettingsComponent
+          client={client}
           organizationId={organizationId}
-          marketplaceAppTenantId={marketplaceAppTenantId}
           onBack={handleBackToList}
           isFirstTimeSetup={libraries.length === 0}
           onSettingsSaved={libraries.length === 0 ? handleSettingsSaved : undefined}

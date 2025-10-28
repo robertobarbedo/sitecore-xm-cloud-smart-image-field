@@ -28,7 +28,6 @@ function getSupabaseClient() {
  */
 interface LibraryRow {
   organization_id: string;
-  marketplace_app_tenant_id: string;
   key: string;
   name: string;
   folder: string;
@@ -49,10 +48,10 @@ function rowToLibrary(row: LibraryRow): Library {
 }
 
 /**
- * Lists all active (non-archived) libraries for an organization and marketplace app tenant
+ * Lists all active (non-archived) libraries for an organization
  */
-export async function listLibraries(organizationId: string, marketplaceAppTenantId: string): Promise<Library[]> {
-  console.log('⏳ Loading active libraries from Supabase for org:', organizationId, 'tenant:', marketplaceAppTenantId);
+export async function listLibraries(organizationId: string): Promise<Library[]> {
+  console.log('⏳ Loading active libraries from Supabase for org:', organizationId);
   
   try {
     const client = getSupabaseClient();
@@ -61,7 +60,6 @@ export async function listLibraries(organizationId: string, marketplaceAppTenant
       .from('libraries')
       .select('*')
       .eq('organization_id', organizationId)
-      .eq('marketplace_app_tenant_id', marketplaceAppTenantId)
       .eq('archived', false)  // Only load non-archived libraries
       .order('created_at', { ascending: true });
 
@@ -81,10 +79,10 @@ export async function listLibraries(organizationId: string, marketplaceAppTenant
 }
 
 /**
- * Checks if there are any active (non-archived) libraries for an organization and marketplace app tenant
+ * Checks if there are any active (non-archived) libraries for an organization
  */
-export async function hasAnyLibraries(organizationId: string, marketplaceAppTenantId: string): Promise<boolean> {
-  console.log('⏳ Checking if any active libraries exist for org:', organizationId, 'tenant:', marketplaceAppTenantId);
+export async function hasAnyLibraries(organizationId: string): Promise<boolean> {
+  console.log('⏳ Checking if any active libraries exist for org:', organizationId);
   
   try {
     const client = getSupabaseClient();
@@ -93,7 +91,6 @@ export async function hasAnyLibraries(organizationId: string, marketplaceAppTena
       .from('libraries')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
-      .eq('marketplace_app_tenant_id', marketplaceAppTenantId)
       .eq('archived', false);  // Only count non-archived libraries
 
     if (error) {
@@ -114,12 +111,12 @@ export async function hasAnyLibraries(organizationId: string, marketplaceAppTena
 /**
  * Creates a new library
  */
-export async function createLibrary(organizationId: string, marketplaceAppTenantId: string, library: Library): Promise<Library> {
+export async function createLibrary(organizationId: string, library: Library): Promise<Library> {
   console.log(`⏳ Creating library in Supabase: ${library.name} (Key: ${library.key})...`);
   
   try {
     // Validate folder doesn't overlap with existing libraries
-    const existingLibraries = await listLibraries(organizationId, marketplaceAppTenantId);
+    const existingLibraries = await listLibraries(organizationId);
     const folderError = validateFolder(library.folder, existingLibraries);
     if (folderError) {
       throw new Error(`Folder validation failed: ${folderError}`);
@@ -129,7 +126,6 @@ export async function createLibrary(organizationId: string, marketplaceAppTenant
     
     const row = {
       organization_id: organizationId,
-      marketplace_app_tenant_id: marketplaceAppTenantId,
       key: library.key,
       name: library.name,
       folder: library.folder,
@@ -159,12 +155,12 @@ export async function createLibrary(organizationId: string, marketplaceAppTenant
 /**
  * Updates an existing library
  */
-export async function updateLibrary(organizationId: string, marketplaceAppTenantId: string, library: Library): Promise<Library> {
+export async function updateLibrary(organizationId: string, library: Library): Promise<Library> {
   console.log(`⏳ Updating library in Supabase: ${library.name}...`);
   
   try {
     // Validate folder doesn't overlap with other libraries (excluding current one)
-    const existingLibraries = await listLibraries(organizationId, marketplaceAppTenantId);
+    const existingLibraries = await listLibraries(organizationId);
     const folderError = validateFolder(library.folder, existingLibraries, library.key);
     if (folderError) {
       throw new Error(`Folder validation failed: ${folderError}`);
@@ -181,7 +177,6 @@ export async function updateLibrary(organizationId: string, marketplaceAppTenant
       .from('libraries') as any)
       .update(updates)
       .eq('organization_id', organizationId)
-      .eq('marketplace_app_tenant_id', marketplaceAppTenantId)
       .eq('key', library.key)
       .select()
       .single();
@@ -204,7 +199,7 @@ export async function updateLibrary(organizationId: string, marketplaceAppTenant
  * Archives a library (soft delete) - not allowed for Main Library
  * This operation cannot be undone through the UI
  */
-export async function archiveLibrary(organizationId: string, marketplaceAppTenantId: string, library: Library): Promise<void> {
+export async function archiveLibrary(organizationId: string, library: Library): Promise<void> {
   if (library.name === 'Main Library') {
     throw new Error('Cannot archive Main Library');
   }
@@ -218,7 +213,6 @@ export async function archiveLibrary(organizationId: string, marketplaceAppTenan
       .from('libraries') as any)
       .update({ archived: true })
       .eq('organization_id', organizationId)
-      .eq('marketplace_app_tenant_id', marketplaceAppTenantId)
       .eq('key', library.key);
 
     if (error) {

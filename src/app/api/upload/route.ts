@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Get config with client credentials
     const config = await getConfig(organizationId, key);
+    console.warn('Config loaded for upload');
+    console.warn(config);
 
     // Step 1: Authenticate with Sitecore OAuth2
     console.log('Step 1: Authenticating with Sitecore OAuth2...');
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest) {
       client_secret: config.clientSecret,
       audience: 'https://api.sitecorecloud.io'
     });
+
 
     // Make OAuth2 request
     const tokenResponse = await fetch(tokenUrl, {

@@ -57,7 +57,7 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
       if (!params) return;
       
       try {
-        const config = await getConfig(params.organizationId, params.key);
+        const config = await getConfig(params.organizationId, params.key, client);
         setPreviewHost(config.previewHost);
       } catch (error) {
         console.error('Error loading preview host:', error);
@@ -65,7 +65,7 @@ export function ImageFind({ client, onImageSelected }: ImageFindProps) {
     };
     
     loadPreviewHost();
-  }, []);
+  }, [client]);
 
   // Debounced search
   useEffect(() => {

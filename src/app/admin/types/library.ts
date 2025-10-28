@@ -22,6 +22,5 @@ export interface LibraryValidationResult {
 export interface SitecoreQueryParams {
   organizationId?: string;
   tenantName?: string;
-  marketplaceAppTenantId?: string;
 }
 

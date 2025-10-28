@@ -11,7 +11,7 @@ export function getAdminUrlParams(): SitecoreQueryParams {
     return {};
   }
 
-  // Get params from current iframe URL (organizationId, marketplaceAppTenantId)
+  // Get params from current iframe URL (organizationId)
   const iframeParams = new URLSearchParams(window.location.search);
   
   // Get params from parent window URL (tenantName)
@@ -29,7 +29,6 @@ export function getAdminUrlParams(): SitecoreQueryParams {
   return {
     organizationId: iframeParams.get('organizationId') || undefined,
     tenantName: parentParams?.get('tenantName') || undefined,
-    marketplaceAppTenantId: iframeParams.get('marketplaceAppTenantId') || undefined,
   };
 }
 

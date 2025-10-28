@@ -104,7 +104,7 @@ function CustomFieldExtension() {
               return;
             }
             
-            const config = await getConfig(params.organizationId, params.key);
+            const config = await getConfig(params.organizationId, params.key, client);
             // Replace "/sitecore/media library/" with config.previewHost + "-/media/"
             const previewUrl = parsedValue.itemPath
               .replace(/^\/sitecore\/media library\//i, config.previewHost + '-/media/')
@@ -200,7 +200,7 @@ function CustomFieldExtension() {
         console.log('Loading library config for:', params);
         
         // Get the base folder from config
-        const config = await getConfig(params.organizationId, params.key);
+        const config = await getConfig(params.organizationId, params.key, client);
         console.log('Loaded config:', config);
         
         const baseFolder = config.baseFolder;

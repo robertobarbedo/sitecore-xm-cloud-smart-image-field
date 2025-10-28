@@ -49,7 +49,7 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
       if (!params) return;
       
       try {
-        const config = await getConfig(params.organizationId, params.key);
+        const config = await getConfig(params.organizationId, params.key, client);
         setBaseFolder(config.baseFolder);
       } catch (error) {
         console.error('Error loading base folder:', error);
@@ -57,7 +57,7 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
     };
     
     loadBaseFolder();
-  }, []);
+  }, [client]);
 
   const sanitizeFileName = (fileName: string): string => {
     // Remove file extension
@@ -267,7 +267,7 @@ export function ImageSelector({ client, onImageSelected, onProcessingChange }: I
       let actualPreviewUrl = previewUrl; // Fallback to blob URL
       if (params && baseFolder) {
         try {
-          const config = await getConfig(params.organizationId, params.key);
+          const config = await getConfig(params.organizationId, params.key, client);
           // Convert itemPath to preview URL: /sitecore/media library/... -> https://host/-media/...
           actualPreviewUrl = itemPath.replace(/^\/sitecore\/media library\//i, config.previewHost + '-/media/') + (fileExtension ? `.${fileExtension}` : '');
         } catch (error) {

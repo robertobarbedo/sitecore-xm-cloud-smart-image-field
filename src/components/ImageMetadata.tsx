@@ -45,7 +45,7 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
       if (params) {
         setOrganizationId(params.organizationId);
         try {
-          const config = await getConfig(params.organizationId, params.key);
+          const config = await getConfig(params.organizationId, params.key, client);
           setPreviewHost(config.previewHost);
         } catch (error) {
           console.error('Error loading config:', error);
@@ -53,7 +53,7 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
       }
     };
     loadConfig();
-  }, []);
+  }, [client]);
 
   // Load metadata when selectedImage changes
   useEffect(() => {
@@ -114,7 +114,7 @@ export function ImageMetadata({ client, selectedImage, onMetadataChange, autoCap
         body: JSON.stringify({ 
           imageUrl: selectedImage.previewUrl,
           organizationId: params.organizationId,
-          key: params.key
+          key: params.key,
         }),
       });
 

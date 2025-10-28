@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { ClientSDK } from '@sitecore-marketplace-sdk/client';
 import { Settings } from '../types/library';
-import { getSettings, saveSettings } from '../lib/supabase-settings';
+import { createSettingsStorage } from '@/src/lib/storage';
 import { validatePreviewHost, normalizePreviewHost } from '../lib/url-parser';
 
 interface SettingsProps {
+  client: ClientSDK;
   organizationId: string;
-  marketplaceAppTenantId: string;
   onBack: () => void;
   onSettingsSaved?: () => void; // Callback for when settings are saved (for first-time setup)
   isFirstTimeSetup?: boolean; // Hide back button during first-time setup
 }
 
-export function SettingsComponent({ organizationId, marketplaceAppTenantId, onBack, onSettingsSaved, isFirstTimeSetup = false }: SettingsProps) {
+export function SettingsComponent({ client, organizationId, onBack, onSettingsSaved, isFirstTimeSetup = false }: SettingsProps) {
   const [formData, setFormData] = useState<Settings>({
     preview_host: '',
     client_id: '',
@@ -26,12 +27,15 @@ export function SettingsComponent({ organizationId, marketplaceAppTenantId, onBa
 
   useEffect(() => {
     loadSettings();
-  }, [organizationId, marketplaceAppTenantId]);
+  }, [organizationId]);
 
   const loadSettings = async () => {
     try {
       setIsLoading(true);
-      const settings = await getSettings(organizationId, marketplaceAppTenantId);
+      
+      const settingsStorage = createSettingsStorage(client);
+      const settings = await settingsStorage.getSettings(organizationId);
+      
       if (settings) {
         setFormData(settings);
       }
@@ -81,7 +85,9 @@ export function SettingsComponent({ organizationId, marketplaceAppTenantId, onBa
         preview_host: normalizePreviewHost(formData.preview_host),
       };
 
-      await saveSettings(organizationId, marketplaceAppTenantId, normalizedSettings);
+      const settingsStorage = createSettingsStorage(client);
+      await settingsStorage.saveSettings(organizationId, normalizedSettings);
+      
       setSuccessMessage('Settings saved successfully!');
       
       // If this is first-time setup, notify parent to continue to library setup

@@ -51,7 +51,10 @@ export function getUrlParams(): { organizationId: string; key: string } | null {
     return null;
   }
   
-  return { organizationId, key };
+  return { 
+    organizationId, 
+    key
+  };
 }
 
 /**

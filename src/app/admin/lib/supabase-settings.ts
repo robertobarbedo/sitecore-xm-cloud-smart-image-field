@@ -27,7 +27,6 @@ function getSupabaseClient() {
  */
 interface SettingsRow {
   organization_id: string;
-  marketplace_app_tenant_id: string;
   preview_host: string;
   client_id?: string;
   client_secret?: string;
@@ -47,10 +46,10 @@ function rowToSettings(row: SettingsRow): Settings {
 }
 
 /**
- * Gets settings for an organization and marketplace app tenant
+ * Gets settings for an organization
  */
-export async function getSettings(organizationId: string, marketplaceAppTenantId: string): Promise<Settings | null> {
-  console.log('⏳ Loading settings from Supabase for org:', organizationId, 'tenant:', marketplaceAppTenantId);
+export async function getSettings(organizationId: string): Promise<Settings | null> {
+  console.log('⏳ Loading settings from Supabase for org:', organizationId);
   
   try {
     const client = getSupabaseClient();
@@ -59,7 +58,6 @@ export async function getSettings(organizationId: string, marketplaceAppTenantId
       .from('settings')
       .select('*')
       .eq('organization_id', organizationId)
-      .eq('marketplace_app_tenant_id', marketplaceAppTenantId)
       .single();
 
     if (error) {
@@ -83,10 +81,10 @@ export async function getSettings(organizationId: string, marketplaceAppTenantId
 }
 
 /**
- * Checks if settings exist for an organization and marketplace app tenant
+ * Checks if settings exist for an organization
  */
-export async function hasSettings(organizationId: string, marketplaceAppTenantId: string): Promise<boolean> {
-  console.log('⏳ Checking if settings exist for org:', organizationId, 'tenant:', marketplaceAppTenantId);
+export async function hasSettings(organizationId: string): Promise<boolean> {
+  console.log('⏳ Checking if settings exist for org:', organizationId);
   
   try {
     const client = getSupabaseClient();
@@ -94,8 +92,7 @@ export async function hasSettings(organizationId: string, marketplaceAppTenantId
     const { count, error } = await client
       .from('settings')
       .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
-      .eq('marketplace_app_tenant_id', marketplaceAppTenantId);
+      .eq('organization_id', organizationId);
 
     if (error) {
       console.error('❌ Error checking for settings:', error);
@@ -115,7 +112,7 @@ export async function hasSettings(organizationId: string, marketplaceAppTenantId
 /**
  * Creates or updates settings (upsert)
  */
-export async function saveSettings(organizationId: string, marketplaceAppTenantId: string, settings: Settings): Promise<Settings> {
+export async function saveSettings(organizationId: string, settings: Settings): Promise<Settings> {
   console.log('⏳ Saving settings to Supabase...');
   
   try {
@@ -123,7 +120,6 @@ export async function saveSettings(organizationId: string, marketplaceAppTenantI
     
     const row = {
       organization_id: organizationId,
-      marketplace_app_tenant_id: marketplaceAppTenantId,
       preview_host: settings.preview_host,
       client_id: settings.client_id || undefined,
       client_secret: settings.client_secret || undefined,
